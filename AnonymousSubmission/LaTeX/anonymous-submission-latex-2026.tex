@@ -91,7 +91,7 @@
 % nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
 % articles, conjunctions, and prepositions are lower case unless they
 % directly follow a colon or long dash
-\title{AAAI Press Anonymous Submission\\Instructions for Authors Using \LaTeX{}}
+\title{Video Comprehension Score (VCS): A Metric for Long-Form Video Description Evaluation}
 \author{
     %Authors
     % All authors must be in the same font size and format.
@@ -166,7 +166,7 @@
 \maketitle
 
 \begin{abstract}
-AAAI creates proceedings, working notes, and technical reports directly from electronic source furnished by the authors. To ensure that all papers in the publication have a uniform appearance, authors must adhere to the following instructions.
+We introduce Video Comprehension Score (VCS), a novel metric for evaluating long-form video comprehension models by comparing generated long video descriptions against human-written references. Current evaluation metrics, including BLEU, ROUGE, METEOR, and CIDEr, rely primarily on rigid text-level comparisons, overlooking narrative coherence, temporal accuracy, and semantic equivalence. Moreover, existing LLM-based metrics such as Auto-DQ and VAD score are computationally expensive and lack sensitivity to event chronology, further complicating accurate evaluation. To address these limitations, VCS employs a unified semantic and temporal framework comprising three key components: Global Alignment Score (GAS), which assesses holistic narrative consistency; Local Alignment Score (LAS), which measures semantic alignment at the segment level; and Narrative Alignment Score (NAS), explicitly capturing temporal correctness. All components utilize robust nv-embed-v2 embeddings, ensuring precise and flexible evaluation from a single human reference. We validate VCS empirically using a synthetic MPII-based dataset containing both valid and invalid narrative variants. VCS significantly outperforms baseline metrics by clearly differentiating correct from incorrect paraphrases, achieving margins exceeding 15 percentage points. Additionally, VCS demonstrates state-of-the-art performance in short-caption evaluations on the VATEX benchmark, attaining the highest human correlation in the 9-reference setting (Kendall $\tau_b=41.5$, Spearman $\rho=51.8$) and competitive results in the single-reference scenario, highlighting its broad applicability and effectiveness.
 \end{abstract}
 
 % Uncomment the following to link to your code, datasets, an extended version or similar.
