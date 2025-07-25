@@ -177,6 +177,41 @@ We introduce Video Comprehension Score (VCS), a novel metric for evaluating long
 %     \link{Extended version}{https://aaai.org/example/extended-version}
 % \end{links}
 
+\section{Introduction}
+
+Recent advancements in Large Video Language Models (LVLMs) have substantially enhanced automated video comprehension, enabling these models to generate extensive and detailed descriptions from complex video content. This advancement is critical for applications demanding nuanced interpretation, including autonomous navigation and assistive technologies. However, accurately evaluating whether these models genuinely comprehend the video content—rather than merely identifying frame-level visual elements—remains challenging, particularly with extended video narratives.
+
+Existing evaluation frameworks primarily utilize question-answering or caption-based methods. Question-answering approaches effectively probe specific, isolated details but inadequately measure holistic comprehension. Conversely, caption-based methods, comparing model-generated descriptions against human-authored references, better capture overall narrative comprehension but fail to effectively assess the recognition of specific, isolated details. Thus, while question-answering excels at assessing detail-oriented comprehension, caption-based evaluations more robustly measure overall narrative understanding. Given our primary concern with comprehensive video comprehension, caption-based evaluation methods are more suitable.
+
+Traditional caption-based evaluation techniques encompass n-gram metrics (e.g., BLEU, METEOR, CIDEr, ROUGE, SPICE), embedding-based metrics (e.g., BERTScore), and contemporary LLM-based approaches. Yet, each of these methodologies exhibits critical shortcomings when applied to extensive descriptions produced by modern LVLMs. N-gram metrics predominantly rely on lexical overlap, unjustly penalizing legitimate stylistic or expressive variations, a limitation amplified as description length increases. Embedding-based metrics address the lexical overlap issue by focusing on semantic similarity rather than word-for-word comparisons; however, they remain constrained by limited context lengths, becoming less effective for very long descriptions, and inadequately evaluate chronological accuracy. Recent LLM-driven methods provide deeper semantic insights but depend heavily on the inherent accuracy and consistency of the underlying LLM, frequently lacking methodological transparency.
+
+Evaluating long-form video descriptions against a reference introduces two principal challenges:
+\begin{enumerate}
+\item \textbf{Expressive Variability}: For extended reference descriptions, multiple valid articulations of identical content exist, differing in detail, style, and length. Conversely, invalid expressions involving omissions, distortions, or hallucinations may also emerge. An effective evaluation metric must discriminate between valid expressive variations—avoiding unnecessary penalties—and accurately detect and penalize invalid articulations.
+\item \textbf{Narrative Variability}: Extended reference descriptions may validly represent events in multiple chronological sequences. However, descriptions may also present genuinely incorrect event sequences, such as reversed or incorrectly ordered events. Therefore, a robust evaluation method must distinguish between valid chronological variations, avoiding unjust penalties, while accurately identifying and penalizing genuinely incorrect event sequences.
+\end{enumerate}
+
+This paper introduces the Video Comprehension Score (VCS), a novel metric addressing these complexities by evaluating dense, long-form video descriptions semantically and structurally. VCS employs Segment Any Text (SaT) for semantic segmentation and NvEmbed-v2 for paragraph and chunk-level embeddings, comprising three components:
+\begin{enumerate}
+\item \textbf{Global Alignment Score (GAS)}: Measures overall thematic similarity using full-text embeddings.
+\item \textbf{Local Alignment Score (LAS)}: Assesses fine-grained semantic correspondence between chunks.
+\item \textbf{Narrative Alignment Score (NAS)}: Evaluates chronological consistency, using a configurable local chronology tolerance factor (LCT) to control the strictness of chronological flexibility.
+\end{enumerate}
+
+We combine GAS and LAS into a Semantic Alignment Score (SAS), representing semantic alignment across long paragraphs. Integrating SAS with NAS yields the comprehensive VCS metric, enabling clear assessment of narrative equivalence and comprehension between model-generated and human-written descriptions.
+
+Additionally, we generalized VCS to VCS$_{\text{short}}$, applying the same principles at varying segment lengths, demonstrating its versatility for shorter captions.
+
+Due to the absence of suitable annotated datasets for long-form dense descriptions—where human judgment becomes increasingly unreliable—we constructed a large-scale synthetic dataset (1390 descriptions, $\sim$500 words each, from MPII via ChatGPT). Two test sets, a Comparison Test Set (27,800 description pairs with diverse valid/invalid variations) and a Multiple-Author Test Set (5560 variants from four LLMs), comprehensively evaluate VCS performance.
+
+Benchmarked against traditional and adapted segment-based metrics (BLEU-S, METEOR-S, ROUGE-L-S), VCS consistently demonstrated robustness to valid narrative variability and sensitivity to invalid alterations. On VATEX-EVAL, VCS$_{\text{short}}$ achieved state-of-the-art results in the 9-reference setting and was a close second in the 1-reference setting.
+
+The results affirm VCS as a reliable metric capable of accurately assessing narrative equivalence across diverse descriptive styles and lengths, configurable for varying chronological rigor. In summary, our primary contributions include:
+\begin{itemize}
+\item A versatile, robust metric (VCS) for evaluating dense and diverse video descriptions across varying lengths and styles.
+\item A configurable approach to balance semantic and chronological evaluation, adaptable to multiple applications.
+\end{itemize}
+
 \section{Preparing an Anonymous Submission}
 
 This document details the formatting requirements for anonymous submissions. The requirements are the same as for camera ready papers but with a few notable differences:
