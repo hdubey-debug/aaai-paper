@@ -253,7 +253,12 @@ For each source element, the algorithm identifies maximum similarity $M_j$ and, 
 \paragraph{Local Alignment Score (LAS)}
 LAS assesses fine-grained semantic quality by averaging cosine similarities of matched chunk pairs. It computes precision-oriented scores by averaging similarities of generated chunks matched to reference chunks, and recall-oriented scores by averaging similarities of reference chunks matched to generated chunks. The final LAS combines these via harmonic mean:
 
-LAS represents the harmonic mean of precision-oriented and recall-oriented local alignment scores, providing zero when no meaningful alignment exists.
+\begin{equation} \label{eq:las_revised}
+LAS = \begin{cases}
+\frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R} & \text{if } LAS_P + LAS_R > 0 \\
+0 & \text{otherwise}
+\end{cases}
+\end{equation}
 
 High LAS indicates strong local semantic agreement, though it remains insensitive to chronological order, necessitating narrative assessment.
 
@@ -270,7 +275,7 @@ This component penalizes when matched elements deviate from expected narrative p
 NAS_{D,x} = 1 - \frac{P_{total,x}}{P_{max,x}}
 \end{equation}
 
-where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$. The final distance-based score $NAS_D$ combines precision and recall orientations through their harmonic mean.
+where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$.
 
 \paragraph{Line-based NAS ($NAS_L$)}
 This component analyzes the geometric path formed by consecutive matched elements, treating alignment as a trajectory through the similarity matrix. VCS computes ideal narrative bands bounded by shortest and longest possible paths through mapping windows. The actual path length incorporates LCT-based filtering. The score evaluates path deviation:
@@ -281,9 +286,15 @@ NAS_{L,x} &= \frac{L_{actual}}{L_{ideal,min}} && \text{if path too short} \label
 NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{eq:nas_lx_long}
 \end{align}
 
-where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations. The final line-based score $NAS_L$ combines precision and recall orientations through their harmonic mean.
+where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations.
 
-The complete Narrative Alignment Score $NAS$ represents the harmonic mean of the distance-based and line-based components.
+The final NAS integrates both distance-based and line-based approaches through harmonic means:
+
+\begin{align}
+NAS_D &= \frac{2 \cdot NAS_{D,P} \cdot NAS_{D,R}}{NAS_{D,P} + NAS_{D,R}} \label{eq:nas_d_final} \\
+NAS_L &= \frac{2 \cdot NAS_{L,P} \cdot NAS_{L,R}}{NAS_{L,P} + NAS_{L,R}} \label{eq:nas_l_final} \\
+NAS_{F1} &= \frac{2 \cdot NAS_D \cdot NAS_L}{NAS_D + NAS_L} \label{eq:nas_f1_final}
+\end{align}
 
 \paragraph{Window Regularization}
 To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
