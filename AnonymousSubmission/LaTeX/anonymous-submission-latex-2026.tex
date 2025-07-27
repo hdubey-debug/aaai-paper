@@ -251,14 +251,7 @@ When comparing texts chunk-by-chunk, naive highest-similarity pairing creates se
 For each source element, the algorithm identifies maximum similarity $M_j$ and, if exceeding a context cutoff (0.6), defines an adaptive similarity margin creating a candidate band. Among candidates within this band, it selects the element closest to its expected narrative position within the mapping window, breaking ties by highest raw similarity. This bidirectional process yields precision-oriented ($M_P$) and recall-oriented ($M_R$) best matches that maintain semantic quality while respecting chronological constraints.
 
 \paragraph{Local Alignment Score (LAS)}
-LAS assesses fine-grained semantic quality by averaging cosine similarities of matched chunk pairs. It computes precision-oriented scores by averaging similarities of generated chunks matched to reference chunks, and recall-oriented scores by averaging similarities of reference chunks matched to generated chunks. The final LAS combines these via harmonic mean:
-
-\begin{equation} \label{eq:las_revised}
-LAS = \begin{cases}
-\frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R} & \text{if } LAS_P + LAS_R > 0 \\
-0 & \text{otherwise}
-\end{cases}
-\end{equation}
+LAS assesses fine-grained semantic quality by averaging cosine similarities of matched chunk pairs. It computes precision-oriented scores ($LAS_P$) by averaging similarities of generated chunks matched to reference chunks, and recall-oriented scores ($LAS_R$) by averaging similarities of reference chunks matched to generated chunks. The final LAS is a combination of $LAS_P$ and $LAS_R$ through harmonic mean.
 
 High LAS indicates strong local semantic agreement, though it remains insensitive to chronological order, necessitating narrative assessment.
 
@@ -288,13 +281,7 @@ NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{
 
 where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations.
 
-The final NAS integrates both distance-based and line-based approaches through harmonic means:
-
-\begin{align}
-NAS_D &= \frac{2 \cdot NAS_{D,P} \cdot NAS_{D,R}}{NAS_{D,P} + NAS_{D,R}} \label{eq:nas_d_final} \\
-NAS_L &= \frac{2 \cdot NAS_{L,P} \cdot NAS_{L,R}}{NAS_{L,P} + NAS_{L,R}} \label{eq:nas_l_final} \\
-NAS_{F1} &= \frac{2 \cdot NAS_D \cdot NAS_L}{NAS_D + NAS_L} \label{eq:nas_f1_final}
-\end{align}
+The final NAS integrates both approaches: $NAS_{F1} = F_1(NAS_D, NAS_L)$, where $NAS_D = F_1(NAS_{D,P}, NAS_{D,R})$ and $NAS_L = F_1(NAS_{L,P}, NAS_{L,R})$.
 
 \paragraph{Window Regularization}
 To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
