@@ -251,14 +251,10 @@ When comparing texts chunk-by-chunk, naive highest-similarity pairing creates se
 For each source element, the algorithm identifies maximum similarity $M_j$ and, if exceeding a context cutoff (0.6), defines an adaptive similarity margin creating a candidate band. Among candidates within this band, it selects the element closest to its expected narrative position within the mapping window, breaking ties by highest raw similarity. This bidirectional process yields precision-oriented ($M_P$) and recall-oriented ($M_R$) best matches that maintain semantic quality while respecting chronological constraints.
 
 \paragraph{Local Alignment Score (LAS)}
-LAS assesses fine-grained semantic quality by averaging cosine similarities of matched chunk pairs. It computes precision-oriented 
-$LAS_P = \frac{\sum_{(c_{j}^{gen},c_{m(j)}^{ref})\in M_P}\text{Sim}(c_{j}^{gen},c_{m(j)}^{ref})}{|M_P|}$ 
-and recall-oriented 
-$LAS_R = \frac{\sum_{(c_{i}^{ref},c_{m(i)}^{gen})\in M_R}\text{Sim}(c_{i}^{ref},c_{m(i)}^{gen})}{|M_R|}$, 
-then combines them via harmonic mean:
+LAS assesses fine-grained semantic quality by averaging cosine similarities of matched chunk pairs. It computes precision-oriented scores by averaging similarities of generated chunks matched to reference chunks, and recall-oriented scores by averaging similarities of reference chunks matched to generated chunks. The final LAS combines these via harmonic mean:
 
 \begin{equation} \label{eq:las_revised}
-LAS = F_1(LAS_P, LAS_R) = \begin{cases}
+LAS = \begin{cases}
 \frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R} & \text{if } LAS_P + LAS_R > 0 \\
 0 & \text{otherwise}
 \end{cases}
@@ -273,75 +269,55 @@ NAS evaluates chronological coherence and narrative integrity using the matched 
 Before computing NAS components, VCS defines Local Chronology Tolerance through multiplier $\tau_{LCT} \geq 0$ that provides configurable flexibility for benign local reorderings and minor content variations. When $\tau_{LCT}=0$, strict chronological order is enforced. Higher values allow increasingly relaxed chronological constraints, enabling the metric to accommodate natural variations in storytelling while maintaining narrative coherence assessment.
 
 \paragraph{Distance-based NAS ($NAS_D$)}
-This component penalizes when matched elements from $M_P$ and $M_R$ deviate from their expected narrative positions within Mapping Windows. For each matched pair, the algorithm computes raw positional distance from the mapping window boundaries, then applies LCT tolerance to determine effective distance $d'$. Matches within mapping windows or within LCT tolerance receive zero penalty, while violations contribute to total penalty $P_{total,x}$, normalized by maximum possible penalty $P_{max,x}$:
+This component penalizes when matched elements deviate from expected narrative positions within Mapping Windows. For each matched pair, the algorithm computes positional distance from mapping window boundaries, applies LCT tolerance, and accumulates penalties. The score normalizes total penalties by maximum possible penalties:
 
 \begin{equation} \label{eq:nas_dx_revised}
-\small
-NAS_{D,x} = \begin{cases}
-1 - \frac{P_{total,x}}{P_{max,x}} & \text{if } P_{max,x} > 0 \\
-1.0 & \text{if } P_{max,x} = 0 \text{ and } P_{total,x} = 0 \\
-0.0 & \text{if } P_{max,x} = 0 \text{ and } P_{total,x} > 0
-\end{cases}
+NAS_{D,x} = 1 - \frac{P_{total,x}}{P_{max,x}}
 \end{equation}
-where $x \in \{P, R\}$.
+
+where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$.
 
 \paragraph{Line-based NAS ($NAS_L$)}
-This component analyzes the geometric path formed by consecutive matched elements from $M_P$ and $M_R$, treating alignment as a trajectory through the similarity matrix. Using dynamic programming, VCS computes ideal narrative bands bounded by shortest ($L_{floor,ideal,x}$) and longest ($L_{ceil,ideal,x}$) possible paths through the mapping windows. The actual path length ($L_{actual,x}$) between consecutive matches incorporates LCT-based segment filtering, where segments exceeding LCT thresholds are either adjusted or excluded. Paths within ideal bands score perfectly, while deviations are penalized proportionally:
+This component analyzes the geometric path formed by consecutive matched elements, treating alignment as a trajectory through the similarity matrix. VCS computes ideal narrative bands bounded by shortest and longest possible paths through mapping windows. The actual path length incorporates LCT-based filtering. The score evaluates path deviation:
 
-\begin{equation} \label{eq:nas_lx_revised}
-\small
-NAS_{L,x} = \begin{cases}
-1.0 & \text{if } L_{floor,ideal,x} \leq L_{actual,x} \leq L_{ceil,ideal,x} \\
-L_{actual,x} / L_{floor,ideal,x} & \text{if } L_{actual,x} < L_{floor,ideal,x} \text{ and } L_{floor,ideal,x} > 0 \\
-L_{ceil,ideal,x} / L_{actual,x} & \text{if } L_{actual,x} > L_{ceil,ideal,x} \text{ and } L_{actual,x} > 0 \\
-0.0 & \text{otherwise}
-\end{cases}
-\end{equation}
-where $x \in \{P, R\}$.
+\begin{align}
+NAS_{L,x} &= 1.0 && \text{if path within ideal band} \label{eq:nas_lx_ideal} \\
+NAS_{L,x} &= \frac{L_{actual}}{L_{ideal,min}} && \text{if path too short} \label{eq:nas_lx_short} \\
+NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{eq:nas_lx_long}
+\end{align}
+
+where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations.
 
 The final NAS integrates both approaches: $NAS_{F1} = F_1(NAS_D, NAS_L)$, where $NAS_D = F_1(NAS_{D,P}, NAS_{D,R})$ and $NAS_L = F_1(NAS_{L,P}, NAS_{L,R})$.
 
 \paragraph{Window Regularization}
-To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Using mapping window area $A_{total,mw}$, timeline area $A_{timeline}$, and minimum ratio $A_{min,ratio} = 1/N_{max}$:
+To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
 
 \begin{equation}
-\small
-R_W = \begin{cases}
-\max\left(0, \min\left(1, \frac{(A_{total,mw} / A_{timeline}) - A_{min,ratio}}{0.5 - A_{min,ratio}}\right)\right) & \text{if } A_{timeline} > 0 \text{ and } A_{min,ratio} < 1 \\
-0 & \text{otherwise}
-\end{cases}
+R_W = \max\left(0, \min\left(1, \frac{\rho - \rho_{min}}{0.5 - \rho_{min}}\right)\right)
 \end{equation}
 
-The regularized score $NAS_{reg} = \frac{NAS_{F1} - R_W}{1 - R_W}$ (when $NAS_{F1} - R_W > 0$ and $R_W < 1$) ensures meaningful chronological assessment even with significant length variations.
+The regularized score becomes:
+\begin{equation}
+NAS_{reg} = \frac{NAS_{F1} - R_W}{1 - R_W}
+\end{equation}
+
+when $NAS_{F1} > R_W$ and $R_W < 1$, ensuring meaningful chronological assessment despite length variations.
 
 \paragraph{Final VCS Aggregation}
 The complete VCS integrates semantic and narrative alignment through careful score combination. GAS is modulated by LAS to yield Semantic Alignment Score ($SAS$):
+
 \begin{equation} \label{eq:sas_revised} 
-SAS = \begin{cases}
-\frac{GAS - (1 - LAS)}{LAS} & \text{if } LAS > 0 \text{ and } (GAS - (1 - LAS)) > 0 \\
-0.0 & \text{otherwise}
-\end{cases}
+SAS = \frac{GAS - (1 - LAS)}{LAS}
 \end{equation}
 
-This modulation ensures that high global similarity requires supporting local semantic agreement. The final score synthesizes $SAS$ with $NAS_{reg}$ through adaptive weighting. Let $S_{num}$ and $S_{den}$ be defined as:
-
-\begin{align}
-S_{num} &= \begin{cases}
-SAS - (1 - NAS_{reg}) & \text{if } SAS < NAS_{reg} \\
-NAS_{reg} - (1 - SAS) & \text{otherwise}
-\end{cases} \\
-S_{den} &= \begin{cases}
-NAS_{reg} & \text{if } SAS < NAS_{reg} \\
-SAS & \text{otherwise}
-\end{cases}
-\end{align}
+when $LAS > 0$ and the numerator is positive, otherwise $SAS = 0$. This ensures high global similarity requires supporting local semantic agreement. The final score synthesizes $SAS$ with $NAS_{reg}$ through adaptive weighting:
 
 \begin{equation} \label{eq:vcs_revised}
-VCS = \begin{cases}
-\frac{S_{num}}{S_{den}} & \text{if } S_{num} > 0 \text{ and } S_{den} \neq 0 \\
-0.0 & \text{otherwise}
-\end{cases}
+VCS = \frac{\min(SAS, NAS_{reg}) - (1 - \max(SAS, NAS_{reg}))}{\max(SAS, NAS_{reg})}
 \end{equation}
+
+when both components are positive and the numerator exceeds zero, otherwise $VCS = 0$.
 
 \paragraph{Extension for Short Captions (VCS$_{short}$)}
 For short caption evaluation, VCS$_{short}$ adapts the complete VCS methodology to operate at word-level granularity. Input texts undergo cleaning to remove punctuation and stop words, then tokenization into individual words that serve as fundamental elements. These words replace multi-word chunks in all alignment and scoring processes while maintaining identical metric computation and aggregation logic, enabling consistent evaluation across different description lengths.
