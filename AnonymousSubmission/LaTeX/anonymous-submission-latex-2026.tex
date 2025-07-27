@@ -288,7 +288,13 @@ NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{
 
 where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations.
 
-The final NAS integrates both approaches: $NAS_{F1} = F_1(NAS_D, NAS_L)$, where $NAS_D = F_1(NAS_{D,P}, NAS_{D,R})$ and $NAS_L = F_1(NAS_{L,P}, NAS_{L,R})$.
+The final NAS integrates both distance-based and line-based approaches through harmonic means:
+
+\begin{align}
+NAS_D &= \frac{2 \cdot NAS_{D,P} \cdot NAS_{D,R}}{NAS_{D,P} + NAS_{D,R}} \label{eq:nas_d_final} \\
+NAS_L &= \frac{2 \cdot NAS_{L,P} \cdot NAS_{L,R}}{NAS_{L,P} + NAS_{L,R}} \label{eq:nas_l_final} \\
+NAS_{F1} &= \frac{2 \cdot NAS_D \cdot NAS_L}{NAS_D + NAS_L} \label{eq:nas_f1_final}
+\end{align}
 
 \paragraph{Window Regularization}
 To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
@@ -313,9 +319,12 @@ SAS = \frac{GAS - (1 - LAS)}{LAS}
 
 when $LAS > 0$ and the numerator is positive, otherwise $SAS = 0$. This ensures high global similarity requires supporting local semantic agreement. The final score synthesizes $SAS$ with $NAS_{reg}$ through adaptive weighting:
 
-\begin{equation} \label{eq:vcs_revised}
-VCS = \frac{\min(SAS, NAS_{reg}) - (1 - \max(SAS, NAS_{reg}))}{\max(SAS, NAS_{reg})}
-\end{equation}
+The final VCS uses adaptive weighting with intermediate variables:
+\begin{align}
+S_{min} &= \min(SAS, NAS_{reg}) \label{eq:s_min} \\
+S_{max} &= \max(SAS, NAS_{reg}) \label{eq:s_max} \\
+VCS &= \frac{S_{min} - (1 - S_{max})}{S_{max}} \label{eq:vcs_final}
+\end{align}
 
 when both components are positive and the numerator exceeds zero, otherwise $VCS = 0$.
 
