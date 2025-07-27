@@ -268,7 +268,7 @@ This component penalizes when matched elements deviate from expected narrative p
 NAS_{D,x} = 1 - \frac{P_{total,x}}{P_{max,x}}
 \end{equation}
 
-where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$.
+where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$. The final $NAS_D$ is a combination of $NAS_{D,P}$ and $NAS_{D,R}$ through harmonic mean.
 
 \paragraph{Line-based NAS ($NAS_L$)}
 This component analyzes the geometric path formed by consecutive matched elements, treating alignment as a trajectory through the similarity matrix. VCS computes ideal narrative bands bounded by shortest and longest possible paths through mapping windows. The actual path length incorporates LCT-based filtering. The score evaluates path deviation:
@@ -279,7 +279,7 @@ NAS_{L,x} &= \frac{L_{actual}}{L_{ideal,min}} && \text{if path too short} \label
 NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{eq:nas_lx_long}
 \end{align}
 
-where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations.
+where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations. The final $NAS_L$ is a combination of $NAS_{L,P}$ and $NAS_{L,R}$ through harmonic mean.
 
 The final NAS integrates both approaches: $NAS_{F1} = F_1(NAS_D, NAS_L)$, where $NAS_D = F_1(NAS_{D,P}, NAS_{D,R})$ and $NAS_L = F_1(NAS_{L,P}, NAS_{L,R})$.
 
