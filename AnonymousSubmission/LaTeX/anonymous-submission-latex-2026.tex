@@ -224,7 +224,7 @@ Multimodal embedding metrics like EMScore \citep{syxl:22} and PAC-S \citep{sbc:2
 
 Recent evaluation approaches increasingly leverage Large Language Models (LLMs), categorized into component-based and holistic judge methods. Component-based methods such as AutoDQ \citep{wyzs:24} and VAD-Score \citep{dp:25} use LLMs for semantic extraction and entailment checks, effectively addressing the expressive variability challenge; however, AutoDQ and VAD do not evaluate the chronology of events. Nonetheless, their effectiveness depends heavily on extraction accuracy, consistency across model updates, scalability with dense content, and reliance on comprehensive references. Conversely, holistic methods such as CapScore \citep{li:24}, CapArena‑Auto Score \citep{cheng:25}, and CLAIR \citep{chan:23} provide overall quality assessments directly from LLMs, theoretically addressing complex evaluation dimensions comprehensively. However, they suffer from ambiguity in score calibration, sensitivity to prompting nuances, consistency issues across model versions, limited interpretability, and practical constraints, including reproducibility and cost.
 
-\section{Methodology: Video Comprehension Score (VCS)}
+\section{Methodology}
 \label{sec:methodology_vcs}
 
 Figure~\ref{fig:vcs-architecture} illustrates the VCS architecture, a comprehensive metric designed to evaluate long-form video descriptions through semantic and narrative alignment assessment. VCS employs NV-Embed-v2~\citep{l:24} to extract embeddings at both global and fine-grained levels, enabling quantitative similarity measurement across different granularities of text analysis.
