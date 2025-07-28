@@ -169,7 +169,7 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{VCS}
-\caption{Architecture of the Video Comprehension Score (VCS). The VCS assesses video descriptions by comparing a reference text ($T_{ref}$) with a model-generated text ($T_{gen}$). Both texts are initially segmented by SaT and embedded via NV-Embed-v2. The Global Alignment Score (GAS) is computed from the full text embeddings. For localized analysis, texts are chunked and embedded, forming a similarity matrix. From this, precision and recall-oriented best matches yield the Local Alignment Score (LAS)—the harmonic mean of $LAS_P$ (precision) and $LAS_R$ (recall). The Narrative Alignment Score (NAS) incorporates distance-based ($NAS_D$) and line-based ($NAS_L$) assessments. $NAS_D$ and $NAS_L$ are harmonic means of their respective precision and recall components. A Window Regularizer ($R_w$) refines the NAS. The Semantic Alignment Score (SAS) is derived by modulating GAS with LAS. The final VCS results from modulating the smaller of SAS and the regularized NAS with the larger.}
+\caption{Architecture of the Video Comprehension Score (VCS). The VCS assesses video descriptions by comparing a reference text ($T_{ref}$) with a model-generated text ($T_{gen}$). Both texts are initially segmented by SaT and embedded via NV-Embed-v2. The Global Alignment Score (GAS) is computed from the full text embeddings. For localized analysis, texts are chunked and embedded, forming a similarity matrix. From this, precision and recall-oriented best matches yield the Local Alignment Score (LAS)—the harmonic mean of $LAS_P$ (precision) and $LAS_R$ (recall). The Narrative Alignment Score (NAS) incorporates distance-based ($NAS_D$) and line-based ($NAS_L$) assessments. $NAS_D$ and $NAS_L$ are harmonic means of their respective precision and recall components. A Window Regularizer ($R_W$) refines the NAS. The Semantic Alignment Score (SAS) is derived by modulating GAS with LAS. The final VCS results from modulating the smaller of SAS and the regularized NAS with the larger.}
 \label{fig:vcs-architecture}
 \end{figure*}
 
@@ -284,7 +284,7 @@ where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,
 The final $NAS$ is a combination of $NAS_D$ and $NAS_L$ through harmonic mean.
 
 \paragraph{Window Regularization}
-To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
+To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
 
 \begin{equation}
 R_W = \max\left(0, \min\left(1, \frac{\rho - \rho_{min}}{0.5 - \rho_{min}}\right)\right)
@@ -292,10 +292,10 @@ R_W = \max\left(0, \min\left(1, \frac{\rho - \rho_{min}}{0.5 - \rho_{min}}\right
 
 The regularized score becomes:
 \begin{equation}
-NAS_{reg} = \frac{NAS_{F1} - R_W}{1 - R_W}
+NAS_{reg} = \frac{NAS - R_W}{1 - R_W}
 \end{equation}
 
-when $NAS_{F1} > R_W$ and $R_W < 1$, ensuring meaningful chronological assessment despite length variations.
+when $NAS > R_W$ and $R_W < 1$, ensuring meaningful chronological assessment despite length variations.
 
 \paragraph{Final VCS Aggregation}
 The complete VCS integrates semantic and narrative alignment through careful score combination. GAS is modulated by LAS to yield Semantic Alignment Score ($SAS$):
