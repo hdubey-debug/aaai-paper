@@ -281,7 +281,7 @@ NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{
 
 where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations. The final $NAS_L$ is a combination of $NAS_{L,P}$ and $NAS_{L,R}$ through harmonic mean.
 
-The final NAS integrates both approaches: $NAS_{F1} = F_1(NAS_D, NAS_L)$.
+The final $NAS$ is a combination of $NAS_D$ and $NAS_L$ through harmonic mean.
 
 \paragraph{Window Regularization}
 To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS_{F1}$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
