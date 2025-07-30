@@ -196,11 +196,11 @@ Description-based evaluation methods fall into four categories, each struggling 
 \item \textbf{Narrative Variability}: Metrics must evaluate chronological structure, however they must tolerate multiple valid chronological arrangements.
 \end{enumerate}
 
-To address these challenges, this paper introduces the Video Comprehension Score (VCS), a novel metric addressing these complexities by evaluating long-form descriptions semantically and structurally. VCS employs Segment Any Text (SaT) \citep{frohmann-etal-2024-segment} for semantic segmentation and NV-Embed-v2 \citep{l:24} for paragraph and chunk-level embeddings, comprising three components:
+To address these challenges, we introduce Video Comprehension Score (VCS), a reference-based metric that directly addresses expressive and narrative variability through three components:
 \begin{enumerate}
-\item \textbf{Global Alignment Score (GAS)}: Measures global thematic alignment using full-text embeddings.
-\item \textbf{Local Alignment Score (LAS)}: Assesses local semantic alignment between chunks.
-\item \textbf{Narrative Alignment Score (NAS)}: Evaluates chronological alignment using a configurable Local Chronology Tolerance factor (LCT) to control the strictness of chronological evaluation.
+\item \textbf{Global Alignment Score (GAS)}: Measures global thematic alignment.
+\item \textbf{Local Alignment Score (LAS)}: Assesses local semantic alignment.
+\item \textbf{Narrative Alignment Score (NAS)}: Evaluates chronological alignment using configurable Local Chronology Tolerance (LCT).
 \end{enumerate}
 
 Combining GAS and LAS yields the Semantic Alignment Score (SAS), representing comprehensive semantic alignment. Integrating SAS with NAS produces the comprehensive VCS metric, clearly assessing narrative equivalence between model-generated and human-written descriptions. Additionally, we generalize VCS to VCS$_{\text{short}}$, applying the same principles to short-form descriptions.
