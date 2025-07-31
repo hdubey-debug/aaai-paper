@@ -124,14 +124,6 @@ Mathematical expression
 - [ ] Component names match introduction?
 - [ ] Equation numbering sequential?
 - [ ] Mathematical expressions properly formatted?
-- [ ] **Terminology carries forward from previous paragraphs?**
-- [ ] **Symbols and variables consistent with earlier definitions?**
-
-### **Cross-Reference Requirements**:
-- **ALWAYS review previous methodology paragraphs** before writing new sections
-- **Reuse established notation**: $C_{ref}$, $C_{gen}$, $N_{ref}$, $N_{gen}$, $MW_{prec}$, $MW_{rec}$, etc.
-- **Reference prior components**: "using the Mapping Windows defined above", "building on the chunk representations from Text Preprocessing"
-- **Maintain component hierarchy**: GAS → Preprocessing → Mapping Windows → Best Matching → LAS → NAS
 
 ### **Completeness Validation**:
 - [ ] All algorithmic steps covered?
