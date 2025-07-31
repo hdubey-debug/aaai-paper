@@ -124,6 +124,22 @@ Mathematical expression
 - [ ] Component names match introduction?
 - [ ] Equation numbering sequential?
 - [ ] Mathematical expressions properly formatted?
+- [ ] **Terminology carries forward from previous paragraphs?**
+- [ ] **Symbols and variables consistent with earlier definitions?**
+
+### **Cross-Reference Requirements**:
+- **ALWAYS review previous methodology paragraphs** before writing new sections
+- **Reuse established notation**: $C_{ref}$, $C_{gen}$, $N_{ref}$, $N_{gen}$, $MW_{prec}$, $MW_{rec}$, $\mathbf{E}_{C_{ref}}$, $\mathbf{E}_{C_{gen}}$, etc.
+- **Reference prior components**: "using the Mapping Windows defined above", "building on the chunk representations from Text Preprocessing", "from $\mathbf{E}_{C_{ref}}$ and $\mathbf{E}_{C_{gen}}$"
+- **Maintain component hierarchy**: GAS → Preprocessing → Mapping Windows → Best Matching → LAS → NAS
+- **Ensure backward compatibility**: New sections must use symbols/terminology established in earlier paragraphs
+
+### **AAAI LaTeX Compliance**:
+- **No overfull boxes**: Equations and text must not overflow column margins (check log files)
+- **Avoid long inline math**: Break complex expressions into prose descriptions when needed
+- **Space efficiency**: Use concise mathematical notation, avoid verbose inline equations
+- **Font compliance**: Use only approved fonts, avoid Type 3 fonts
+- **Mathematics formatting**: Computer Modern acceptable for math only, must fit within columns
 
 ### **Completeness Validation**:
 - [ ] All algorithmic steps covered?
