@@ -224,7 +224,7 @@ Recent evaluation approaches increasingly leverage Large Language Models (LLMs),
 Figure~\ref{fig:vcs-architecture} shows the VCS pipeline, which computes semantic and narrative alignment between reference and generated descriptions to achieve comprehensive long-form video description evaluation.
 
 \paragraph{Global Alignment Score (GAS)}
-VCS computes global thematic alignment to capture overall semantic correspondence between reference and generated descriptions. Given input texts $T_{ref}$ and $T_{gen}$, we extract global embeddings $\mathbf{E}_{ref}, \mathbf{E}_{gen} \in \mathbb{R}^{D}$ using NV-Embed-v2. The GAS computes cosine similarity between these global vectors:
+To capture global thematic alignment, VCS first encodes each full description—$T_{ref}$ and $T_{gen}$—into a single, $D$-dimensional vector via NV-Embed-v2. The GAS computes cosine similarity between these global vectors:
 
 \begin{equation} \label{eq:gas_revised}
 \text{GAS} = \frac{\mathbf{E}_{ref} \cdot \mathbf{E}_{gen}}{\|\mathbf{E}_{ref}\| \|\mathbf{E}_{gen}\|}
