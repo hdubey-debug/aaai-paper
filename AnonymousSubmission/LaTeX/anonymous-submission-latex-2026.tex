@@ -313,82 +313,11 @@ For short-form description evaluation, VCS$_{short}$ adapts the complete VCS met
 
 \section{Dataset Construction}
 
-We construct a large-scale synthetic dataset from the MPII Movie Description Dataset (MPII-MD) \citep{rohrbach2015dataset} to evaluate VCS on long-form video descriptions. MPII-MD contains 94 movies with approximately 68,000 manually annotated segments. Each segment provides a precise start-end timestamp aligned with exactly one descriptive sentence. From this foundation, we derive two specialized test sets to assess VCS performance on distinct evaluation tasks.
+We construct two synthetic datasets from MPII-MD \citep{rohrbach2015dataset} containing 94 movies with 68,000 annotated segments. We extract 1,390 consecutive scene groups (~500 words each) and use ChatGPT-4o to synthesize coherent narrative descriptions, yielding our base dataset.
 
-\subsection{Base Description Generation}
+For corruption detection, we generate 10 valid variations per base description using lexical variation, voice transformation, paraphrasing, abstraction (50\%/70\% reduction), elaboration (130\%/150\% expansion), action decomposition/aggregation, and attribute injection. We create 10 invalid corruptions using SAO distortion, ID summarization, hallucination (50\%/80\% unrelated segments), omission (50\%/80\% deletion), sequence inversion, local/global permutation, and sequence rotation. All transformations employ SAT segmentation while preserving segment content integrity, producing 27,800 test instances.
 
-We extract consecutive scene sequences from each movie to create coherent narrative units. For each movie's temporal sequence, we select groups of $n$ consecutive scenes where the combined annotations contain approximately 500 words. This word-count criterion ensures consistent narrative scope across different movies while maintaining semantic coherence. From the 94 movies in MPII-MD, this process yields 1,390 scene groups.
-
-For each scene group, we prompt ChatGPT-4o to synthesize the individual consecutive scene annotations into a coherent narrative description without removing any information. This produces 1,390 base descriptions with an average word count of approximately 500 words. These base descriptions serve as our ground-truth references for subsequent corruption testing.
-
-\subsection{Corruption Detection Test Set}
-
-The Corruption Detection Test Set evaluates VCS ability to distinguish valid narrative variations from invalid content corruptions. For each of the 1,390 base descriptions, we generate 10 valid variations and 10 invalid corruptions, creating a comprehensive evaluation framework with 27,800 total test instances.
-
-\paragraph{Valid Variations}
-We create 10 types of valid variations that preserve narrative integrity while introducing legitimate stylistic and structural changes:
-
-\textbf{Lexical Variation}: Replace words with exact synonyms while preserving sentence structure, punctuation, capitalization, and meaning. Stop words remain unchanged.
-
-\textbf{Voice Transformation}: Convert active voice to passive voice and vice versa, maintaining meaning, structure, punctuation, and proper names without altering factual content.
-
-\textbf{Paraphrasing}: Restructure clauses and employ synonyms while preserving exact sentence count and all factual details. No sentences are merged, split, added, or removed.
-
-\textbf{Low-Abstraction}: Reduce word count to 50\% through sentence shortening and merging while preserving all information content and narrative sequence.
-
-\textbf{High-Abstraction}: Reduce word count to 70\% by condensing and merging sentences while maintaining sequence and meaning without omitting details.
-
-\textbf{Low-Elaboration}: Increase word count to 130\% through rephrasing and descriptive language addition without introducing new factual details.
-
-\textbf{High-Elaboration}: Increase word count to 150\% using enhanced descriptive language while avoiding addition of new factual information.
-
-\textbf{Action Decomposition}: Break actions into detailed micro-steps within continuous paragraph format, preserving story, meaning, and sequence without altering events.
-
-\textbf{Action Aggregation}: Merge micro-actions into higher-level actions while preserving meaning, sequence, and details without information modification.
-
-\textbf{Attribute Injection}: Add external knowledge and contextual information using real-world or plausible synthetic details, integrating naturally without removing or altering existing content.
-
-\paragraph{Invalid Corruptions}
-We generate 10 types of invalid corruptions that introduce content errors while maintaining surface plausibility:
-
-\textbf{SAO Distortion}: Replace all subjects, actions, and objects with incorrect but plausible alternatives while maintaining narrative sequence and flow. No original subjects, actions, or objects remain.
-
-\textbf{ID Summarization}: Reduce to 50\% word count by identifying core plot elements, characters, and conflicts, but remove crucial narrative details creating confusing gaps in comprehension.
-
-\textbf{Minor Hallucination}: Use SAT segmentation to insert unrelated segments comprising 50\% of ground-truth segments at middle indices with proper punctuation.
-
-\textbf{Major Hallucination}: Insert unrelated segments comprising 80\% of ground-truth segments using the same SAT-based methodology as minor hallucination.
-
-\textbf{Minor Omission}: Delete 50\% of segments from middle positions outward using SAT segmentation while ensuring minimum two segments remain and adding proper punctuation.
-
-\textbf{Major Omission}: Delete 80\% of segments using identical methodology as minor omission but with more aggressive content removal.
-
-\textbf{Sequence Inversion}: Reverse complete segment order using SAT segmentation without modifying individual segment content.
-
-\textbf{Local Permutation}: Swap adjacent segment pairs following the pattern [1,2,3,4,5] → [2,1,4,3,5] without modifying segment content or performing non-adjacent swaps.
-
-\textbf{Sequence Rotation}: Move 50\% of segments from start to end while maintaining segment order within the moved chunk, avoiding scrambling or end-to-start rotation.
-
-\textbf{Global Permutation}: Use SAT segmentation to randomly shuffle all segment order without modifying segment content, avoiding preservation of original sequence or deterministic reordering.
-
-All corruption methods employ SAT model semantic segmentation via TextProcessor.sat\_segmenter(), preserve individual segment content integrity, and use configurable random seeds for reproducibility. The corruptions target structural and semantic violations while maintaining syntactic plausibility, creating challenging test cases for evaluation metrics.
-
-\subsection{Cross-Author Consistency Test Set}
-
-The Cross-Author Consistency Test Set evaluates VCS robustness across different authorial styles while maintaining identical semantic content. We construct this dataset using the same 1,390 scene groups from MPII-MD, generating multiple authorial versions of each base description to assess metric stability across stylistic variations.
-
-Using the ChatGPT-4o generated descriptions as Author 1 baseline, we prompt three additional Large Language Models to transform the original chronological scene lists into coherent descriptions using distinct authorial approaches. Each model receives identical scene sequences and applies systematic transformations while preserving narrative integrity.
-
-\paragraph{Authorial Transformation Protocol}
-We instruct each LLM to transform chronological scene lists into coherent movie descriptions through eight specific stylistic modifications: paraphrasing with varied vocabulary and sentence structure, active-passive voice switching, brevity adjustments maintaining all factual content, verbosity enhancements without introducing new events, micro-macro action scaling, attribute adjustment through adjective and adverb modifications, variable detail expression emphasizing key scenes, and scene expansion with emotional or background elaboration excluding new plot points. Models maintain chronological order and preserve all events, actions, subjects, and objects while avoiding content omission, chronological alteration, new plot creation, or major content removal during attribute adjustments.
-
-\paragraph{Model Specifications}
-We employ three distinct LLMs to generate varied authorial styles:
-\textbf{Author 2 (Grok)}: Grok 3 model for dynamic narrative construction.
-\textbf{Author 3 (Claude)}: Claude Sonnet 3.5 for nuanced descriptive styling.
-\textbf{Author 4 (Mistral)}: Mistral-Large for structured narrative presentation.
-
-Each model processes the 1,390 scene groups independently, producing semantically equivalent descriptions with distinct authorial characteristics. This generates 5,560 cross-author descriptions (1,390 × 4 authors) enabling comprehensive evaluation of metric consistency across authorial variations while maintaining identical underlying content.
+For cross-author consistency, we use the same 1,390 scene groups with Grok 3, Claude Sonnet 3.5, and Mistral-Large to generate authorial variations through stylistic transformations including paraphrasing, voice switching, brevity/verbosity adjustments, action scaling, attribute modification, detail variation, and scene expansion while preserving chronological order and factual content. This produces 5,560 descriptions (1,390 × 4 authors) for evaluating metric robustness across writing styles.
 
 \section{Experiments}
 
