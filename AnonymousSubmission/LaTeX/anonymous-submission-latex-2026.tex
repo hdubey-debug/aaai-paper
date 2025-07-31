@@ -227,7 +227,7 @@ Figure~\ref{fig:vcs-architecture} shows the VCS pipeline, which computes semanti
 VCS computes GAS to capture global thematic alignment between reference and generated descriptions. Given input texts $T_{ref}$ and $T_{gen}$, we encode each description using NV-Embed-v2. The GAS is computed as:
 
 \begin{equation} \label{eq:gas_revised}
-\text{GAS} = \mathbf{E}_{ref}^{\top} \mathbf{E}_{gen}
+\text{GAS} = \frac{\mathbf{E}_{ref} \cdot \mathbf{E}_{gen}}{\|\mathbf{E}_{ref}\| \|\mathbf{E}_{gen}\|}
 \end{equation}
 
 \paragraph{Text Preprocessing for Chunk-Level Analysis}
