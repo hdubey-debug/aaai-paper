@@ -224,15 +224,32 @@ Recent evaluation approaches increasingly leverage Large Language Models (LLMs),
 Figure~\ref{fig:vcs-architecture} shows the VCS pipeline, which computes semantic and narrative alignment between reference and generated descriptions to achieve comprehensive long-form video description evaluation.
 
 \paragraph{Global Alignment Score (GAS)}
-VCS begins with global semantic assessment to capture overall thematic alignment between reference and generated texts. Entire texts $T_{ref}$ and $T_{gen}$ are embedded via NV-Embed-v2 to yield global vectors $E_{ref}$ and $E_{gen}$. GAS computes their cosine similarity:
-\begin{equation} \label{eq:gas_revised}
-\text{GAS} = \cos(E_{ref}, E_{gen}) = \frac{E_{ref} \cdot E_{gen}}{\|E_{ref}\| \|E_{gen}\|}
+VCS computes global thematic alignment to capture overall semantic correspondence between reference and generated descriptions. Given input texts $T_{ref}$ and $T_{gen}$, we extract global embeddings using NV-Embed-v2:
+
+\begin{equation} \label{eq:gas_embeddings}
+\mathbf{E}_{ref} = \text{NV-Embed-v2}(T_{ref}), \quad \mathbf{E}_{gen} = \text{NV-Embed-v2}(T_{gen})
 \end{equation}
 
-While GAS effectively measures thematic congruence, it cannot capture local semantic agreement or chronological ordering, necessitating fine-grained chunk-level analysis.
+where $\mathbf{E}_{ref}, \mathbf{E}_{gen} \in \mathbb{R}^{D}$. The GAS computes cosine similarity between these global vectors:
+
+\begin{equation} \label{eq:gas_revised}
+\text{GAS} = \frac{\mathbf{E}_{ref} \cdot \mathbf{E}_{gen}}{\|\mathbf{E}_{ref}\| \|\mathbf{E}_{gen}\|}
+\end{equation}
 
 \paragraph{Text Preprocessing for Chunk-Level Analysis}
-To enable fine-grained comparison, VCS establishes correspondences between smaller text units. The preprocessing pipeline first cleans input texts $T_{ref}$ and $T_{gen}$ by removing punctuation, then applies Segment Any Text (SaT)~\citep{frohmann-etal-2024-segment} segmentation to produce semantic segments $S_{ref}$ and $S_{gen}$. To balance granularity with contextual coherence, $k$ consecutive segments form ``chunks,'' yielding sequences $C_{ref}$ and $C_{gen}$. These chunks are embedded using NV-Embed-v2 into matrices $E_{C_{ref}} \in \mathbb{R}^{N_{ref} \times D}$ and $E_{C_{gen}} \in \mathbb{R}^{N_{gen} \times D}$, enabling quantitative similarity measurement essential for Local and Narrative Alignment Scores.
+To enable fine-grained semantic comparison, VCS preprocesses input texts into structured chunk representations. Given texts $T_{ref}$ and $T_{gen}$, the preprocessing pipeline applies punctuation removal followed by Segment Any Text (SaT) segmentation to produce semantic segments:
+
+\begin{equation} \label{eq:segmentation}
+S_{ref} = \text{SaT}(\text{Clean}(T_{ref})), \quad S_{gen} = \text{SaT}(\text{Clean}(T_{gen}))
+\end{equation}
+
+To balance granularity with contextual coherence, we group $k$ consecutive segments into chunks $C_{ref} = \{c_1^{ref}, ..., c_{N_{ref}}^{ref}\}$ and $C_{gen} = \{c_1^{gen}, ..., c_{N_{gen}}^{gen}\}$. These chunks are embedded using NV-Embed-v2 to yield embedding matrices:
+
+\begin{equation} \label{eq:chunk_embeddings}
+\mathbf{E}_{C_{ref}} \in \mathbb{R}^{N_{ref} \times D}, \quad \mathbf{E}_{C_{gen}} \in \mathbb{R}^{N_{gen} \times D}
+\end{equation}
+
+This structured representation enables quantitative similarity measurement for subsequent Local and Narrative Alignment Score computation.
 
 \paragraph{Defining Mapping Windows}
 Before establishing chunk correspondences, VCS defines Mapping Windows (MW) that constrain the search space for optimal alignments. This concept stems from empirical observations in text similarity matrices: when computing pairwise embeddings between identical stories using sentence transformers, the resulting similarity matrix exhibits a clear diagonal structure. The first sentence from one text has highest cosine similarity with the first sentence from the other, and this diagonal pattern holds even when stories have different lengths—in brevity cases (shorter generated text) or verbosity cases (longer generated text), the diagonal pattern stretches or compresses proportionally.
