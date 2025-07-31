@@ -373,6 +373,23 @@ We generate 10 types of invalid corruptions that introduce content errors while 
 
 All corruption methods employ SAT model semantic segmentation via TextProcessor.sat\_segmenter(), preserve individual segment content integrity, and use configurable random seeds for reproducibility. The corruptions target structural and semantic violations while maintaining syntactic plausibility, creating challenging test cases for evaluation metrics.
 
+\subsection{Cross-Author Consistency Test Set}
+
+The Cross-Author Consistency Test Set evaluates VCS robustness across different authorial styles while maintaining identical semantic content. We construct this dataset using the same 1,390 scene groups from MPII-MD, generating multiple authorial versions of each base description to assess metric stability across stylistic variations.
+
+Using the ChatGPT-4o generated descriptions as Author 1 baseline, we prompt three additional Large Language Models to transform the original chronological scene lists into coherent descriptions using distinct authorial approaches. Each model receives identical scene sequences and applies systematic transformations while preserving narrative integrity.
+
+\paragraph{Authorial Transformation Protocol}
+We instruct each LLM to transform chronological scene lists into coherent movie descriptions through eight specific stylistic modifications: paraphrasing with varied vocabulary and sentence structure, active-passive voice switching, brevity adjustments maintaining all factual content, verbosity enhancements without introducing new events, micro-macro action scaling, attribute adjustment through adjective and adverb modifications, variable detail expression emphasizing key scenes, and scene expansion with emotional or background elaboration excluding new plot points. Models maintain chronological order and preserve all events, actions, subjects, and objects while avoiding content omission, chronological alteration, new plot creation, or major content removal during attribute adjustments.
+
+\paragraph{Model Specifications}
+We employ three distinct LLMs to generate varied authorial styles:
+\textbf{Author 2 (Grok)}: Grok 3 model for dynamic narrative construction.
+\textbf{Author 3 (Claude)}: Claude Sonnet 3.5 for nuanced descriptive styling.
+\textbf{Author 4 (Mistral)}: Mistral-Large for structured narrative presentation.
+
+Each model processes the 1,390 scene groups independently, producing semantically equivalent descriptions with distinct authorial characteristics. This generates 5,560 cross-author descriptions (1,390 × 4 authors) enabling comprehensive evaluation of metric consistency across authorial variations while maintaining identical underlying content.
+
 \section{Experiments}
 
 We conduct comprehensive experiments to evaluate VCS performance on corruption detection tasks. Our evaluation compares VCS against established video description metrics to assess its ability to distinguish valid narrative variations from invalid corruptions.
