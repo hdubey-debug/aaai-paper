@@ -311,6 +311,78 @@ when both components are positive and the numerator exceeds zero, otherwise $VCS
 \paragraph{Extension for Short-Form Descriptions (VCS$_{short}$)}
 For short-form description evaluation, VCS$_{short}$ adapts the complete VCS methodology to operate at word-level granularity. Input texts undergo cleaning to remove punctuation and stop words, then tokenization into individual words that serve as fundamental elements. These words replace multi-word chunks in all alignment and scoring processes while maintaining identical metric computation and aggregation logic, enabling consistent evaluation across different description lengths.
 
+\section{Dataset Construction}
+
+We construct a large-scale synthetic dataset from the MPII Movie Description Dataset (MPII-MD) \citep{rohrbach2015dataset} to evaluate VCS on long-form video descriptions. MPII-MD contains 94 movies with approximately 68,000 manually annotated segments. Each segment provides a precise start-end timestamp aligned with exactly one descriptive sentence. From this foundation, we derive two specialized test sets to assess VCS performance on distinct evaluation tasks.
+
+\subsection{Base Description Generation}
+
+We extract consecutive scene sequences from each movie to create coherent narrative units. For each movie's temporal sequence, we select groups of $n$ consecutive scenes where the combined annotations contain approximately 500 words. This word-count criterion ensures consistent narrative scope across different movies while maintaining semantic coherence. From the 94 movies in MPII-MD, this process yields 1,390 scene groups.
+
+For each scene group, we prompt ChatGPT-4o to synthesize the individual consecutive scene annotations into a coherent narrative description without removing any information. This produces 1,390 base descriptions with an average word count of approximately 500 words. These base descriptions serve as our ground-truth references for subsequent corruption testing.
+
+\subsection{Corruption Detection Test Set}
+
+The Corruption Detection Test Set evaluates VCS ability to distinguish valid narrative variations from invalid content corruptions. For each of the 1,390 base descriptions, we generate 10 valid variations and 10 invalid corruptions, creating a comprehensive evaluation framework with 27,800 total test instances.
+
+\paragraph{Valid Variations}
+We create 10 types of valid variations that preserve narrative integrity while introducing legitimate stylistic and structural changes:
+
+\textbf{Lexical Variation}: Replace words with exact synonyms while preserving sentence structure, punctuation, capitalization, and meaning. Stop words remain unchanged.
+
+\textbf{Voice Transformation}: Convert active voice to passive voice and vice versa, maintaining meaning, structure, punctuation, and proper names without altering factual content.
+
+\textbf{Paraphrasing}: Restructure clauses and employ synonyms while preserving exact sentence count and all factual details. No sentences are merged, split, added, or removed.
+
+\textbf{Low-Abstraction}: Reduce word count to 50\% through sentence shortening and merging while preserving all information content and narrative sequence.
+
+\textbf{High-Abstraction}: Reduce word count to 70\% by condensing and merging sentences while maintaining sequence and meaning without omitting details.
+
+\textbf{Low-Elaboration}: Increase word count to 130\% through rephrasing and descriptive language addition without introducing new factual details.
+
+\textbf{High-Elaboration}: Increase word count to 150\% using enhanced descriptive language while avoiding addition of new factual information.
+
+\textbf{Action Decomposition}: Break actions into detailed micro-steps within continuous paragraph format, preserving story, meaning, and sequence without altering events.
+
+\textbf{Action Aggregation}: Merge micro-actions into higher-level actions while preserving meaning, sequence, and details without information modification.
+
+\textbf{Attribute Injection}: Add external knowledge and contextual information using real-world or plausible synthetic details, integrating naturally without removing or altering existing content.
+
+\paragraph{Invalid Corruptions}
+We generate 10 types of invalid corruptions that introduce content errors while maintaining surface plausibility:
+
+\textbf{SAO Distortion}: Replace all subjects, actions, and objects with incorrect but plausible alternatives while maintaining narrative sequence and flow. No original subjects, actions, or objects remain.
+
+\textbf{ID Summarization}: Reduce to 50\% word count by identifying core plot elements, characters, and conflicts, but remove crucial narrative details creating confusing gaps in comprehension.
+
+\textbf{Minor Hallucination}: Use SAT segmentation to insert unrelated segments comprising 50\% of ground-truth segments at middle indices with proper punctuation.
+
+\textbf{Major Hallucination}: Insert unrelated segments comprising 80\% of ground-truth segments using the same SAT-based methodology as minor hallucination.
+
+\textbf{Minor Omission}: Delete 50\% of segments from middle positions outward using SAT segmentation while ensuring minimum two segments remain and adding proper punctuation.
+
+\textbf{Major Omission}: Delete 80\% of segments using identical methodology as minor omission but with more aggressive content removal.
+
+\textbf{Sequence Inversion}: Reverse complete segment order using SAT segmentation without modifying individual segment content.
+
+\textbf{Local Permutation}: Swap adjacent segment pairs following the pattern [1,2,3,4,5] → [2,1,4,3,5] without modifying segment content or performing non-adjacent swaps.
+
+\textbf{Sequence Rotation}: Move 50\% of segments from start to end while maintaining segment order within the moved chunk, avoiding scrambling or end-to-start rotation.
+
+\textbf{Global Permutation}: Use SAT segmentation to randomly shuffle all segment order without modifying segment content, avoiding preservation of original sequence or deterministic reordering.
+
+All corruption methods employ SAT model semantic segmentation via TextProcessor.sat\_segmenter(), preserve individual segment content integrity, and use configurable random seeds for reproducibility. The corruptions target structural and semantic violations while maintaining syntactic plausibility, creating challenging test cases for evaluation metrics.
+
+\section{Experiments}
+
+We conduct comprehensive experiments to evaluate VCS performance on corruption detection tasks. Our evaluation compares VCS against established video description metrics to assess its ability to distinguish valid narrative variations from invalid corruptions.
+
+\subsection{Experimental Setup}
+
+We evaluate VCS alongside four rule-based metrics: BLEU \citep{p:02}, ROUGE-L \citep{l:04}, METEOR \citep{bl:05}, and CIDEr \citep{v:15}, and two embedding-based metrics: BERTScore \citep{z:20} and SBERT \citep{r:19}. For BERTScore, we use the RoBERTa-base backbone with F1-measure configuration. For SBERT, we employ the all-MiniLM-L6-v2 model for sentence embeddings. VCS uses NV-Embed-v2 for text embeddings with chunk size $k=3$ and Local Chronology Tolerance $\tau_{LCT}=0.1$ across all experiments.
+
+The Corruption Detection Test Set provides ground-truth labels where valid variations receive score 1 and invalid corruptions receive score 0. For each metric, we compute scores between base descriptions and their corresponding variations/corruptions, then evaluate classification performance using accuracy, precision, recall, and F1-score with threshold 0.5.
+
 \section{Preparing an Anonymous Submission}
 
 This document details the formatting requirements for anonymous submissions. The requirements are the same as for camera ready papers but with a few notable differences:
