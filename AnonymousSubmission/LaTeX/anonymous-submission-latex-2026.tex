@@ -169,7 +169,7 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{VCS}
-\caption{Architecture of the Video Comprehension Score (VCS). The VCS assesses video descriptions by comparing a reference text ($T_{ref}$) with a model-generated text ($T_{gen}$). Both texts are initially segmented by SaT and embedded via NV-Embed-v2. The Global Alignment Score (GAS) is computed from the full text embeddings. For localized analysis, texts are chunked and embedded, forming a similarity matrix. From this, precision and recall-oriented best matches yield the Local Alignment Score (LAS)—the harmonic mean of $LAS_P$ (precision) and $LAS_R$ (recall). The Narrative Alignment Score (NAS) incorporates distance-based ($NAS_D$) and line-based ($NAS_L$) assessments. $NAS_D$ and $NAS_L$ are harmonic means of their respective precision and recall components. A Window Regularizer ($R_W$) refines the NAS. The Semantic Alignment Score (SAS) is derived by modulating GAS with LAS. The final VCS results from modulating the smaller of SAS and the regularized NAS with the larger.}
+\caption{VCS Pipeline. The VCS assesses video descriptions by comparing a reference text ($T_{ref}$) with a model-generated text ($T_{gen}$). Both texts are initially segmented by SaT and embedded via NV-Embed-v2. The Global Alignment Score (GAS) is computed from the full text embeddings. For localized analysis, texts are chunked and embedded, forming a similarity matrix. From this, precision and recall-oriented best matches yield the Local Alignment Score (LAS)—the harmonic mean of $LAS_P$ (precision) and $LAS_R$ (recall). The Narrative Alignment Score (NAS) incorporates distance-based ($NAS_D$) and line-based ($NAS_L$) assessments. $NAS_D$ and $NAS_L$ are harmonic means of their respective precision and recall components. A Window Regularizer ($R_W$) refines the NAS. The Semantic Alignment Score (SAS) is derived by modulating GAS with LAS. The final VCS results from modulating the smaller of SAS and the regularized NAS with the larger.}
 \label{fig:vcs-architecture}
 \end{figure*}
 
@@ -221,7 +221,7 @@ Recent evaluation approaches increasingly leverage Large Language Models (LLMs),
 \section{Methodology}
 \label{sec:methodology_vcs}
 
-Figure~\ref{fig:vcs-architecture} illustrates the VCS architecture, a comprehensive metric designed to evaluate long-form video descriptions through semantic and narrative alignment assessment. VCS employs NV-Embed-v2~\citep{l:24} to extract embeddings at both global and fine-grained levels, enabling quantitative similarity measurement across different granularities of text analysis.
+Figure~\ref{fig:vcs-architecture} illustrates the VCS architecture, a comprehensive metric designed to evaluate long-form video descriptions through semantic and narrative alignment assessment.
 
 \paragraph{Global Alignment Score (GAS)}
 VCS begins with global semantic assessment to capture overall thematic alignment between reference and generated texts. Entire texts $T_{ref}$ and $T_{gen}$ are embedded via NV-Embed-v2 to yield global vectors $E_{ref}$ and $E_{gen}$. GAS computes their cosine similarity:
