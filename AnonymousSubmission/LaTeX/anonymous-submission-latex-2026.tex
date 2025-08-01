@@ -259,9 +259,6 @@ Having obtained the correspondence sets $M_P$ and $M_R$ from the Best-Matching A
 \paragraph{Narrative Alignment Score (NAS)}
 NAS evaluates chronological alignment and narrative integrity using the matched pairs $M_P$ and $M_R$ established by the Best Matching Algorithm. It addresses LAS's order insensitivity through two complementary approaches: distance-based penalties for positional deviations and line-based path analysis for narrative flow assessment.
 
-\paragraph{Local Chronology Tolerance (LCT)}
-Before computing NAS components, VCS defines Local Chronology Tolerance through multiplier $\tau_{LCT} \geq 0$ that provides configurable flexibility for benign local reorderings and minor content variations. When $\tau_{LCT}=0$, strict chronological order is enforced. Higher values allow increasingly relaxed chronological constraints, enabling the metric to accommodate natural variations in storytelling while maintaining chronological alignment assessment.
-
 \paragraph{Distance-based NAS ($NAS_D$)}
 From the correspondence sets $M_P$ (generated → reference) and $M_R$ (reference → generated) produced by the Best-Matching Algorithm, $NAS_D$ penalises any match that drifts outside its Mapping Window. In a given orientation let $N_{eval}$ be the length of the timeline being evaluated and $N_{opp}$ the length of the opposite timeline. A local-chronology-tolerance height
 
