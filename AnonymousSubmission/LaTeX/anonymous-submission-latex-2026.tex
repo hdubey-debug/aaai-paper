@@ -261,44 +261,60 @@ NAS evaluates chronological alignment and narrative integrity using the matched 
 Before computing NAS components, VCS defines Local Chronology Tolerance through multiplier $\tau_{LCT} \geq 0$ that provides configurable flexibility for benign local reorderings and minor content variations. When $\tau_{LCT}=0$, strict chronological order is enforced. Higher values allow increasingly relaxed chronological constraints, enabling the metric to accommodate natural variations in storytelling while maintaining chronological alignment assessment.
 
 \paragraph{Distance-based NAS ($NAS_D$)}
-However, only measuring semantic similarity may lose chronological alignment constraints, which inspires us to design distance-based penalties that enforce temporal consistency within Mapping Windows. Given the correspondence sets $M_P$ and $M_R$ from the Best-Matching Algorithm, VCS computes distance-based penalties for matches that deviate from their expected narrative positions.
+From the correspondence sets $M_P$ (generated → reference) and $M_R$ (reference → generated) produced by the Best-Matching Algorithm, $NAS_D$ penalises any match that drifts outside its Mapping Window. In a given orientation let $N_{eval}$ be the length of the timeline being evaluated and $N_{opp}$ the length of the opposite timeline. A local-chronology-tolerance height
 
-The Local Chronology Tolerance defines an auxiliary window height $h_{LCT} = \lceil y/x \rceil$ that drops by one when the length ratio's fractional part lies in $(0, 0.5]$ for cases where $y > x$. A user-controlled multiplier $\tau_{LCT} \geq 0$ expands each Mapping Window by $\tau_{LCT} \cdot h_{LCT}$ rows on both sides, treating any match within this tolerance zone as chronologically acceptable with zero penalty.
-
-For each match at index $k$ with original Mapping Window $[s, e)$, VCS computes the raw distance as $d(k) = s - k$ when $k < s$ or $d(k) = k - (e-1)$ when $k \geq e$. After applying LCT tolerance, the effective penalty becomes $p(k) = \max(0, d(k) - \tau_{LCT} \cdot h_{LCT}) / y$, with matches already inside windows incurring no penalty. The total penalty accumulates across all matches: $P_{total} = \sum_{j=1}^\ell p(k_j)$, while maximum possible penalty assumes all matches drift to the furthest timeline edges: $P_{max} = \frac{1}{y} \sum_{j=1}^\ell \max(s_j, y - e_j)$.
-
-By such penalty normalization, it is easy to distinguish chronologically consistent matches from severe temporal violations. The orientation-specific scores become $NAS_{D,prec} = 1 - P_{total,prec} / P_{max,prec}$ and $NAS_{D,rec} = 1 - P_{total,rec} / P_{max,rec}$, which combine through harmonic mean: $NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}}$. Perfect chronological alignment yields $NAS_D = 1.0$, while severe temporal inversions approach zero. Note that length-normalized penalties modulated by $\tau_{LCT}$ cleanly separate systematic temporal violations from benign local reorderings while remaining scale-invariant across narratives of different lengths.
-
-\begin{equation} \label{eq:nas_dx_revised}
-NAS_{D,x} = 1 - \frac{P_{total,x}}{P_{max,x}}
+\begin{equation}
+h_{LCT} = \lceil N_{eval}/N_{opp} \rceil - 1[N_{eval} > N_{opp} \land 0 < \text{frac}(N_{eval}/N_{opp}) \leq 0.5]
 \end{equation}
 
-where $P_{total,x}$ represents accumulated positional penalties and $P_{max,x}$ denotes maximum possible penalties for precision ($x=P$) or recall ($x=R$) orientations. When no violations occur, $NAS_{D,x} = 1.0$. The final $NAS_D$ is a combination of $NAS_{D,P}$ and $NAS_{D,R}$ through harmonic mean.
+is first derived from the Mapping-Window height, and each window is expanded symmetrically by $\tau_{LCT} h_{LCT}$ rows ($\tau_{LCT} \geq 0$ is user-set). For a match at row $k$ with window $[s,e)$ the raw offset is $d(k) = s - k$ when $k < s$ or $k - (e-1)$ when $k \geq e$; the LCT-adjusted per-chunk penalty becomes $p(k) = \max\{0, d(k) - \tau_{LCT} h_{LCT}\}/N_{eval}$. Summing over all windows yields $P_{total}$; the worst-case penalty for the same window layout is $P_{max} = N_{eval}^{-1} \sum_j \max(s_j, N_{eval} - e_j)$. The orientation score is $NAS_{D,*} = 1 - P_{total}/P_{max}$, and the two orientations are fused by the harmonic mean
+
+\begin{equation}
+NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}}.
+\end{equation}
 
 \paragraph{Line-based NAS ($NAS_L$)}
-This component analyzes the geometric path formed by consecutive matched elements, treating alignment as a trajectory through the similarity matrix. VCS computes ideal narrative bands bounded by shortest and longest possible paths through Mapping Windows. The actual path length incorporates LCT-based filtering. The score evaluates path deviation:
-
-\begin{align}
-NAS_{L,x} &= 1.0 && \text{if path within ideal band} \label{eq:nas_lx_ideal} \\
-NAS_{L,x} &= \frac{L_{actual}}{L_{ideal,min}} && \text{if path too short} \label{eq:nas_lx_short} \\
-NAS_{L,x} &= \frac{L_{ideal,max}}{L_{actual}} && \text{if path too long} \label{eq:nas_lx_long}
-\end{align}
-
-where $L_{actual}$ represents actual path length, $L_{ideal,min}$ and $L_{ideal,max}$ define ideal narrative band boundaries for precision ($x=P$) or recall ($x=R$) orientations. The final $NAS_L$ is a combination of $NAS_{L,P}$ and $NAS_{L,R}$ through harmonic mean.
-
-The final $NAS$ is a combination of $NAS_D$ and $NAS_L$ through harmonic mean.
-
-\paragraph{Window Regularization}
-To mitigate influence from extreme text length disparities, a Window Regularizer ($R_W$) adjusts $NAS$. Let $\rho = A_{mw} / A_{timeline}$ represent the mapping window coverage ratio, and $\rho_{min} = 1/N_{max}$ represent minimum allowable coverage:
+Treating each matched pair as a vertex $(x_i, y_i)$, VCS compares the path that connects them to an ideal narrative band bounded by the shortest and longest feasible paths constrained by the Mapping Windows. Dynamic programming gives the floor length $L_{min}$ and ceil length $L_{max}$; their vertical increments $\Delta y_{x_i}^{\text{floor}}$ are cached for later clipping. With source length $N_{src}$ and target length $N_{tgt}$ (equal to $N_{ref}$ or $N_{gen}$ depending on orientation) the base window height is $h_{mw} = \lceil N_{tgt}/N_{src} \rceil$. This height in turn defines an LCT kernel $\omega_0$ and its expanded version $\omega_{LCT} = \omega_0 + \kappa \tau_{LCT}$, where the scale $\kappa$ is $h_{mw}$ or $h_{mw} - 1$ exactly as in the implementation. For consecutive vertices the segment length is
 
 \begin{equation}
-R_W = \max\left(0, \min\left(1, \frac{\rho - \rho_{min}}{0.5 - \rho_{min}}\right)\right)
+\ell_i = \begin{cases}
+\sqrt{\Delta x_i^2 + \Delta y_i^2}, & 0 \leq |\Delta y_i|^* \leq \omega_0, \\
+\sqrt{\Delta x_i^2 + |\Delta y_{x_i}^{\text{floor}}|^2}, & \omega_0 < |\Delta y_i|^* \leq \omega_{LCT}, \\
+0, & \text{otherwise},
+\end{cases}
 \end{equation}
 
-The regularized score becomes:
+where $|\Delta y_i|^* = |\Delta y_i|$ if $\tau_{LCT} > 0$ and $|\Delta y_i|^* = \Delta y_i$ when $\tau_{LCT} = 0$. Summing $\ell_i$ gives the realised length $L_{act}$. The orientation score is
+
 \begin{equation}
-NAS_{reg} = \frac{NAS - R_W}{1 - R_W}
+NAS_{L,*} = \begin{cases}
+1, & L_{min} \leq L_{act} \leq L_{max}, \\
+L_{act}/L_{min}, & L_{act} < L_{min}, \\
+L_{max}/L_{act}, & L_{act} > L_{max}.
+\end{cases}
 \end{equation}
+
+The two orientations are again combined with a harmonic mean to obtain $NAS_L$.
+
+\paragraph{Window-area Regulariser ($R_w$)}
+Let $W$ be the Mapping-Window set that spans the longer vertical timeline ($MW_{rec}$ if $N_{gen} > N_{ref}$, otherwise $MW_{prec}$). With window heights $h_j$, the covered area is $A_{MW} = \sum_{w_j \in W} h_j$; the full grid area is $A_{timeline} = N_{ref} N_{gen}$. Setting $a = A_{MW}/A_{timeline}$ and $a_{min} = 1/\max(N_{ref}, N_{gen})$, we regularise the window width by
+
+\begin{equation}
+R_w = \text{clip}[(a - a_{min})/(0.5 - a_{min}), 0, 1].
+\end{equation}
+
+\paragraph{Final NAS}
+The distance- and line-based views are first merged: $NAS_{F1} = 2 NAS_D NAS_L/(NAS_D + NAS_L)$ (defined as 0 when both inputs are zero). Overly permissive windows are then discounted:
+
+\begin{equation}
+NAS_{final} = \begin{cases}
+(NAS_{F1} - R_w)/(1 - R_w), & NAS_{F1} > R_w, \\
+0, & \text{otherwise}.
+\end{cases}
+\end{equation}
+
+Thus NAS captures positional fidelity ($NAS_D$), global path coherence ($NAS_L$), and penalises inflated scores that could arise from excessively wide Mapping Windows, all while respecting the established notation from the preceding sections.
+
 
 when $NAS > R_W$ and $R_W < 1$, ensuring meaningful chronological assessment despite length variations.
 
