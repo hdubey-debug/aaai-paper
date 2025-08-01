@@ -7,6 +7,8 @@
 \usepackage[hyphens]{url}  % DO NOT CHANGE THIS
 \usepackage{graphicx} % DO NOT CHANGE THIS
 \usepackage{amsmath}  % For mathematical typesetting
+\usepackage{amssymb}  % For mathematical symbols like \mathbb
+\usepackage{multirow} % For multirow cells in tables
 \urlstyle{rm} % DO NOT CHANGE THIS
 \def\UrlFont{\rm}  % DO NOT CHANGE THIS
 \usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
@@ -358,6 +360,161 @@ We conduct comprehensive experiments to evaluate VCS performance on corruption d
 We evaluate VCS alongside four rule-based metrics: BLEU \citep{p:02}, ROUGE-L \citep{l:04}, METEOR \citep{bl:05}, and CIDEr \citep{v:15}, and two embedding-based metrics: BERTScore \citep{z:20} and SBERT \citep{r:19}. For BERTScore, we use the RoBERTa-base backbone with F1-measure configuration. For SBERT, we employ the all-MiniLM-L6-v2 model for sentence embeddings. VCS uses NV-Embed-v2 for text embeddings with chunk size $k=3$ and Local Chronology Tolerance $\tau_{LCT}=0.1$ across all experiments.
 
 The Corruption Detection Test Set provides ground-truth labels where valid variations receive score 1 and invalid corruptions receive score 0. For each metric, we compute scores between base descriptions and their corresponding variations/corruptions, then evaluate classification performance using accuracy, precision, recall, and F1-score with threshold 0.5.
+
+\subsection{Corruption Detection Results}
+
+Table~\ref{tab:corruption-results} presents the performance of VCS compared to traditional metrics across various text transformations. The transformations are grouped into Valid Test Cases (legitimate variations that should receive high scores) and Invalid Test Cases (corruptions that should receive low scores). For each metric, the top value represents the mean and the bottom value represents the standard deviation.
+
+\begin{table*}[t]
+\centering
+\setlength{\tabcolsep}{0.75mm}
+\normalsize
+\begin{tabular}{l|cccccccccc@{\hskip 4pt}|cccccccccc}
+\hline
+\textbf{Metric} & \multicolumn{10}{c@{\hskip 4pt}}{\textbf{Valid Test Cases}} & \multicolumn{10}{c}{\textbf{Invalid Test Cases}} \\
+\cline{2-11} \cline{12-21}
+& \rotatebox{85}{\small\textbf{Lexical Variation}} &
+\rotatebox{85}{\small\textbf{Voice Transformation}} &
+\rotatebox{85}{\small\textbf{Paraphrasing}} &
+\rotatebox{85}{\small\textbf{Low-Abstraction}} &
+\rotatebox{85}{\small\textbf{High-Abstraction}} &
+\rotatebox{85}{\small\textbf{Low-Elaboration}} &
+\rotatebox{85}{\small\textbf{High-Elaboration}} &
+\rotatebox{85}{\small\textbf{Action Decomposition}} &
+\rotatebox{85}{\small\textbf{Action Aggregation}} &
+\rotatebox{85}{\small\textbf{Attribute Injection}} &
+\rotatebox{85}{\small\textbf{Minor Hallucination}} &
+\rotatebox{85}{\small\textbf{Major Hallucination}} &
+\rotatebox{85}{\small\textbf{Minor Omission}} &
+\rotatebox{85}{\small\textbf{Major Omission}} &
+\rotatebox{85}{\small\textbf{SAO Distortion}} &
+\rotatebox{85}{\small\textbf{Summarization}} &
+\rotatebox{85}{\small\textbf{Local Permutation}} &
+\rotatebox{85}{\small\textbf{Global Permutation}} &
+\rotatebox{85}{\small\textbf{Sequence Inversion}} &
+\rotatebox{85}{\small\textbf{Sequence Rotation}} \\
+\hline
+
+\multirow{2}{*}{BLEU-1} & {\normalsize 83.1} & {\normalsize 79.8} & {\normalsize 69.3} & {\normalsize 38.3} & {\normalsize 23.4} & {\normalsize 66.5} & {\normalsize 55.7} & {\normalsize 57.2} & {\normalsize 34.0} & {\normalsize 69.5} & {\normalsize 53.9} & {\normalsize 43.7} & {\normalsize 38.9} & {\normalsize 3.7} & {\normalsize 49.4} & {\normalsize 8.1} & {\normalsize 99.6} & {\normalsize 99.7} & {\normalsize 99.7} & {\normalsize 99.7} \\
+& {\footnotesize ±8.5} & {\footnotesize ±5.7} & {\footnotesize ±5.6} & {\footnotesize ±14} & {\footnotesize ±11} & {\footnotesize ±8.9} & {\footnotesize ±7.2} & {\footnotesize ±8.9} & {\footnotesize ±12} & {\footnotesize ±6.5} & {\footnotesize ±6.9} & {\footnotesize ±7.0} & {\footnotesize ±7.1} & {\footnotesize ±2.8} & {\footnotesize ±4.6} & {\footnotesize ±5.4} & {\footnotesize ±0.6} & {\footnotesize ±0.5} & {\footnotesize ±0.5} & {\footnotesize ±0.5} \\
+\cline{2-21}
+
+\multirow{2}{*}{BLEU-4} & {\normalsize 63.2} & {\normalsize 52.8} & {\normalsize 34.9} & {\normalsize 18.6} & {\normalsize 9.40} & {\normalsize 36.5} & {\normalsize 25.5} & {\normalsize 25.1} & {\normalsize 13.1} & {\normalsize 62.5} & {\normalsize 53.5} & {\normalsize 43.3} & {\normalsize 38.4} & {\normalsize 3.60} & {\normalsize 10.5} & {\normalsize 2.20} & {\normalsize 90.0} & {\normalsize 90.4} & {\normalsize 90.2} & {\normalsize 99.2} \\
+& {\footnotesize ±15} & {\footnotesize ±10} & {\footnotesize ±8.3} & {\footnotesize ±11} & {\footnotesize ±7.0} & {\footnotesize ±14} & {\footnotesize ±9.1} & {\footnotesize ±10} & {\footnotesize ±8.3} & {\footnotesize ±8.3} & {\footnotesize ±6.9} & {\footnotesize ±7.0} & {\footnotesize ±7.1} & {\footnotesize ±2.7} & {\footnotesize ±4.6} & {\footnotesize ±2.1} & {\footnotesize ±3.7} & {\footnotesize ±3.7} & {\footnotesize ±3.6} & {\footnotesize ±1.0} \\
+\cline{2-21}
+
+\multirow{2}{*}{METEOR} & {\normalsize 88.1} & {\normalsize 87.0} & {\normalsize 65.5} & {\normalsize 39.2} & {\normalsize 29.5} & {\normalsize 69.7} & {\normalsize 63.2} & {\normalsize 58.7} & {\normalsize 33.4} & {\normalsize 86.3} & {\normalsize 82.6} & {\normalsize 79.4} & {\normalsize 47.1} & {\normalsize 21.0} & {\normalsize 50.2} & {\normalsize 17.7} & {\normalsize 83.7} & {\normalsize 64.4} & {\normalsize 58.9} & {\normalsize 63.2} \\
+& {\footnotesize ±7.1} & {\footnotesize ±5.3} & {\footnotesize ±8.1} & {\footnotesize ±11} & {\footnotesize ±8.2} & {\footnotesize ±11} & {\footnotesize ±8.6} & {\footnotesize ±8.8} & {\footnotesize ±9.0} & {\footnotesize ±4.4} & {\footnotesize ±2.4} & {\footnotesize ±2.9} & {\footnotesize ±4.6} & {\footnotesize ±3.7} & {\footnotesize ±6.3} & {\footnotesize ±4.5} & {\footnotesize ±2.0} & {\footnotesize ±3.4} & {\footnotesize ±3.2} & {\footnotesize ±3.7} \\
+\cline{2-21}
+
+\multirow{2}{*}{ROUGE-1} & {\normalsize 84.0} & {\normalsize 89.7} & {\normalsize 74.9} & {\normalsize 64.0} & {\normalsize 54.1} & {\normalsize 77.3} & {\normalsize 69.9} & {\normalsize 69.5} & {\normalsize 58.1} & {\normalsize 81.8} & {\normalsize 69.7} & {\normalsize 60.4} & {\normalsize 67.0} & {\normalsize 36.0} & {\normalsize 51.4} & {\normalsize 37.2} & {\normalsize 98.9} & {\normalsize 99.0} & {\normalsize 99.0} & {\normalsize 99.0} \\
+& {\footnotesize ±8.1} & {\footnotesize ±3.1} & {\footnotesize ±4.3} & {\footnotesize ±9.6} & {\footnotesize ±9.2} & {\footnotesize ±6.8} & {\footnotesize ±6.0} & {\footnotesize ±7.1} & {\footnotesize ±9.3} & {\footnotesize ±4.6} & {\footnotesize ±5.9} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±4.4} & {\footnotesize ±7.0} & {\footnotesize ±0.9} & {\footnotesize ±0.9} & {\footnotesize ±0.9} & {\footnotesize ±0.9} \\
+\cline{2-21}
+
+\multirow{2}{*}{ROUGE-4} & {\normalsize 50.3} & {\normalsize 41.0} & {\normalsize 20.4} & {\normalsize 15.7} & {\normalsize 8.90} & {\normalsize 25.6} & {\normalsize 16.4} & {\normalsize 15.3} & {\normalsize 9.50} & {\normalsize 66.3} & {\normalsize 67.3} & {\normalsize 58.4} & {\normalsize 64.2} & {\normalsize 33.4} & {\normalsize 2.50} & {\normalsize 2.90} & {\normalsize 78.9} & {\normalsize 79.6} & {\normalsize 79.2} & {\normalsize 96.2} \\
+& {\footnotesize ±18} & {\footnotesize ±12} & {\footnotesize ±7.5} & {\footnotesize ±10} & {\footnotesize ±6.2} & {\footnotesize ±15} & {\footnotesize ±8.9} & {\footnotesize ±10} & {\footnotesize ±6.7} & {\footnotesize ±9.3} & {\footnotesize ±6.1} & {\footnotesize ±7.0} & {\footnotesize ±4.8} & {\footnotesize ±5.5} & {\footnotesize ±2.0} & {\footnotesize ±2.3} & {\footnotesize ±6.6} & {\footnotesize ±6.6} & {\footnotesize ±6.6} & {\footnotesize ±2.7} \\
+\cline{2-21}
+
+\multirow{2}{*}{ROUGE-L} & {\normalsize 83.5} & {\normalsize 75.4} & {\normalsize 67.0} & {\normalsize 55.6} & {\normalsize 45.6} & {\normalsize 69.7} & {\normalsize 60.6} & {\normalsize 57.6} & {\normalsize 45.2} & {\normalsize 81.6} & {\normalsize 69.6} & {\normalsize 60.3} & {\normalsize 66.9} & {\normalsize 36.0} & {\normalsize 47.2} & {\normalsize 27.4} & {\normalsize 65.1} & {\normalsize 36.5} & {\normalsize 23.1} & {\normalsize 53.5} \\
+& {\footnotesize ±8.4} & {\footnotesize ±6.5} & {\footnotesize ±6.0} & {\footnotesize ±11} & {\footnotesize ±9.8} & {\footnotesize ±10} & {\footnotesize ±8.4} & {\footnotesize ±9.6} & {\footnotesize ±10} & {\footnotesize ±4.7} & {\footnotesize ±6.0} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±5.4} & {\footnotesize ±6.4} & {\footnotesize ±2.7} & {\footnotesize ±4.6} & {\footnotesize ±2.3} & {\footnotesize ±3.2} \\
+\cline{2-21}
+
+\multirow{2}{*}{ROUGE-Lsum} & {\normalsize 83.8} & {\normalsize 84.7} & {\normalsize 73.4} & {\normalsize 62.1} & {\normalsize 52.1} & {\normalsize 76.0} & {\normalsize 68.4} & {\normalsize 67.5} & {\normalsize 55.4} & {\normalsize 81.8} & {\normalsize 69.7} & {\normalsize 60.4} & {\normalsize 67.0} & {\normalsize 36.0} & {\normalsize 50.7} & {\normalsize 35.2} & {\normalsize 97.7} & {\normalsize 97.7} & {\normalsize 96.7} & {\normalsize 98.8} \\
+& {\footnotesize ±8.2} & {\footnotesize ±4.1} & {\footnotesize ±4.5} & {\footnotesize ±10} & {\footnotesize ±9.4} & {\footnotesize ±7.3} & {\footnotesize ±6.3} & {\footnotesize ±7.4} & {\footnotesize ±9.3} & {\footnotesize ±4.6} & {\footnotesize ±5.9} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±4.5} & {\footnotesize ±6.8} & {\footnotesize ±1.7} & {\footnotesize ±1.9} & {\footnotesize ±2.4} & {\footnotesize ±1.1} \\
+\hline
+
+\multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 93.7} & {\normalsize 95.1} & {\normalsize 95.8} & {\normalsize 86.0} & {\normalsize 80.0} & {\normalsize 92.2} & {\normalsize 87.5} & {\normalsize 88.5} & {\normalsize 81.0} & {\normalsize 86.4} & {\normalsize 69.1} & {\normalsize 53.4} & {\normalsize 62.2} & {\normalsize 1.90} & {\normalsize 5.00} & {\normalsize 62.4} & {\normalsize 0.70} & {\normalsize 3.40} & {\normalsize 0.10} & {\normalsize 42.9} \\
+& {\footnotesize ±7.1} & {\footnotesize ±3.7} & {\footnotesize ±2.8} & {\footnotesize ±8.8} & {\footnotesize ±10} & {\footnotesize ±4.6} & {\footnotesize ±5.4} & {\footnotesize ±5.9} & {\footnotesize ±10} & {\footnotesize ±4.7} & {\footnotesize ±6.8} & {\footnotesize ±14} & {\footnotesize ±4.9} & {\footnotesize ±4.9} & {\footnotesize ±10} & {\footnotesize ±18} & {\footnotesize ±2.3} & {\footnotesize ±4.4} & {\footnotesize ±0.8} & {\footnotesize ±2.8} \\
+\cline{2-21}
+
+\multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 94.1} & {\normalsize 96.7} & {\normalsize 96.7} & {\normalsize 90.5} & {\normalsize 86.3} & {\normalsize 93.5} & {\normalsize 88.7} & {\normalsize 90.4} & {\normalsize 86.9} & {\normalsize 86.8} & {\normalsize 70.5} & {\normalsize 54.9} & {\normalsize 68.3} & {\normalsize 6.70} & {\normalsize 5.40} & {\normalsize 73.5} & {\normalsize 76.1} & {\normalsize 15.2} & {\normalsize 43.6} & {\normalsize 43.0} \\
+& {\footnotesize ±7.1} & {\footnotesize ±2.6} & {\footnotesize ±1.8} & {\footnotesize ±5.8} & {\footnotesize ±6.5} & {\footnotesize ±3.9} & {\footnotesize ±5.0} & {\footnotesize ±5.2} & {\footnotesize ±6.9} & {\footnotesize ±4.5} & {\footnotesize ±7.0} & {\footnotesize ±14} & {\footnotesize ±4.6} & {\footnotesize ±10} & {\footnotesize ±10} & {\footnotesize ±12} & {\footnotesize ±6.5} & {\footnotesize ±7.6} & {\footnotesize ±2.4} & {\footnotesize ±2.8} \\
+\hline
+\end{tabular}
+\caption{Corruption detection performance across various text transformations. Valid Test Cases represent legitimate variations that should receive high scores, while Invalid Test Cases represent corruptions that should receive low scores. For each metric, the top value represents the mean and the bottom value represents the standard deviation. VCS consistently outperforms traditional metrics by maintaining high scores for valid variations while effectively detecting corruptions.}
+\label{tab:corruption-results}
+\end{table*}
+
+\subsection{Human Judgment Correlation Results}
+
+Table~\ref{tab:vatex-eval} presents human judgment correlation scores on the VATEX-EVAL dataset, comparing VCS against traditional metrics in both single-reference (1Ref) and multi-reference (9Refs) settings using Kendall's $\tau_b$ and Spearman's $\rho$ correlation coefficients.
+
+\begin{table}[t]
+  \centering
+  \normalsize
+  \setlength{\tabcolsep}{0.75mm}
+  \begin{tabular}{l@{\hspace{0.1mm}}cccc}
+    \hline
+    & \multicolumn{2}{c}{\textbf{1Ref}} & \multicolumn{2}{c}{\textbf{9Refs}} \\
+    \cline{2-3} \cline{4-5}
+    & Kendall $\tau_b$ & Spearman $\rho$ & Kendall $\tau_b$ & Spearman $\rho$ \\
+    \hline
+    BLEU-1 & 12.2 & 15.9 & 28.9 & 37.0 \\
+    BLEU-4 & 12.6 & 16.4 & 22.4 & 29.5 \\
+    ROUGE & 12.5 & 16.3 & 23.8 & 30.9 \\
+    METEOR & 16.4 & 21.5 & 27.6 & 35.7 \\
+    CIDEr & 17.3 & 22.6 & 27.8 & 36.1 \\
+    \hline
+    BERT-S & 18.2 & 23.7 & 29.3 & 37.8 \\
+    BERT-S++ & 15.2 & 19.8 & 24.4 & 31.7 \\
+    \hline
+    EMScore & 28.6 & 37.1 & 36.8 & 47.2 \\
+    PAC-S & 00.0 & 00.0 & 00.0 & 00.0 \\
+    RefPAC-S & \textbf{31.4} & \textbf{40.5} & 38.1 & 48.8 \\
+    \hline
+    VCS$_{C_1|LCT_0}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
+    VCS$_{C_1|LCT_1}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
+    \hline
+  \end{tabular}
+  \caption{Human judgment correlation scores on VATEX-EVAL dataset.}
+  \label{tab:vatex-eval}
+\end{table}
+
+\subsection{Cross-Author Consistency Results}
+
+Table~\ref{tab:author-consistency} presents performance comparison of different metrics across various authorial combinations. For each metric, the top value represents the mean and the bottom value represents the standard deviation.
+
+\begin{table*}[t]
+  \centering
+  \normalsize
+  \setlength{\tabcolsep}{0.75mm}
+  \begin{tabular}{l@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}}
+    \hline
+    \textbf{Metric} & \multicolumn{3}{c}{\textbf{Author 1}} & \multicolumn{3}{c}{\textbf{Author 2}} & \multicolumn{3}{c}{\textbf{Author 3}} & \multicolumn{3}{c}{\textbf{Author 4}} \\
+    \cline{2-4} \cline{5-7} \cline{8-10} \cline{11-13}
+                    & A1-A2 & A1-A3 & A1-A4 & A2-A1 & A2-A3 & A2-A4 & A3-A1 & A3-A2 & A3-A4 & A4-A1 & A4-A2 & A4-A3 \\
+    \hline
+    \multirow{2}{*}{BLEU-1} & {\normalsize 45.1} & {\normalsize 46.3} & {\normalsize 52.4} & {\normalsize 46.4} & {\normalsize 39.4} & {\normalsize 50.8} & {\normalsize 43.8} & {\normalsize 33.7} & {\normalsize 40.2} & {\normalsize 53.3} & {\normalsize 50.2} & {\normalsize 44.7} \\
+                    & {\footnotesize ±6.7} & {\footnotesize ±4.3} & {\footnotesize ±9.2} & {\footnotesize ±5.9} & {\footnotesize ±5.0} & {\footnotesize ±5.7} & {\footnotesize ±5.8} & {\footnotesize ±6.8} & {\footnotesize ±9.3} & {\footnotesize ±8.2} & {\footnotesize ±6.3} & {\footnotesize ±6.8} \\
+    \hline
+    \multirow{2}{*}{BLEU-4} & {\normalsize 9.30} & {\normalsize 9.70} & {\normalsize 15.2} & {\normalsize 9.60} & {\normalsize 8.10} & {\normalsize 12.0} & {\normalsize 9.20} & {\normalsize 7.00} & {\normalsize 9.70} & {\normalsize 15.4} & {\normalsize 11.9} & {\normalsize 10.7} \\
+                    & {\footnotesize ±3.5} & {\footnotesize ±2.6} & {\footnotesize ±7.0} & {\footnotesize ±3.5} & {\footnotesize ±2.6} & {\footnotesize ±3.9} & {\footnotesize ±2.6} & {\footnotesize ±2.6} & {\footnotesize ±3.7} & {\footnotesize ±6.9} & {\footnotesize ±3.9} & {\footnotesize ±3.5} \\
+    \hline
+    \multirow{2}{*}{METEOR} & {\normalsize 35.2} & {\normalsize 42.9} & {\normalsize 41.6} & {\normalsize 41.1} & {\normalsize 43.5} & {\normalsize 42.8} & {\normalsize 33.5} & {\normalsize 29.0} & {\normalsize 33.9} & {\normalsize 43.1} & {\normalsize 38.1} & {\normalsize 44.8} \\
+                    & {\footnotesize ±5.0} & {\footnotesize ±3.5} & {\footnotesize ±7.6} & {\footnotesize ±3.8} & {\footnotesize ±3.0} & {\footnotesize ±4.4} & {\footnotesize ±3.3} & {\footnotesize ±3.9} & {\footnotesize ±5.4} & {\footnotesize ±7.5} & {\footnotesize ±6.4} & {\footnotesize ±5.5} \\
+    \hline
+    \multirow{2}{*}{ROUGE-1} & {\normalsize 56.0} & {\normalsize 57.8} & {\normalsize 62.1} & {\normalsize 56.0} & {\normalsize 55.2} & {\normalsize 60.2} & {\normalsize 57.8} & {\normalsize 55.2} & {\normalsize 59.4} & {\normalsize 62.1} & {\normalsize 60.2} & {\normalsize 59.4} \\
+                     & {\footnotesize ±4.8} & {\footnotesize ±3.4} & {\footnotesize ±6.6} & {\footnotesize ±4.8} & {\footnotesize ±4.2} & {\footnotesize ±4.3} & {\footnotesize ±3.4} & {\footnotesize ±4.2} & {\footnotesize ±5.0} & {\footnotesize ±6.6} & {\footnotesize ±4.3} & {\footnotesize ±5.0} \\
+    \hline
+    \multirow{2}{*}{ROUGE-4} & {\normalsize 3.00} & {\normalsize 3.20} & {\normalsize 6.60} & {\normalsize 3.00} & {\normalsize 3.20} & {\normalsize 4.50} & {\normalsize 3.20} & {\normalsize 3.20} & {\normalsize 4.40} & {\normalsize 6.60} & {\normalsize 4.50} & {\normalsize 4.40} \\
+                     & {\footnotesize ±1.8} & {\footnotesize ±1.5} & {\footnotesize ±4.9} & {\footnotesize ±1.8} & {\footnotesize ±1.5} & {\footnotesize ±2.3} & {\footnotesize ±1.5} & {\footnotesize ±1.5} & {\footnotesize ±2.1} & {\footnotesize ±4.9} & {\footnotesize ±2.3} & {\footnotesize ±2.1} \\
+    \hline
+    \multirow{2}{*}{ROUGE-L} & {\normalsize 36.6} & {\normalsize 40.4} & {\normalsize 43.8} & {\normalsize 36.6} & {\normalsize 34.9} & {\normalsize 38.3} & {\normalsize 40.4} & {\normalsize 34.9} & {\normalsize 38.8} & {\normalsize 43.8} & {\normalsize 38.3} & {\normalsize 38.8} \\
+                     & {\footnotesize ±4.9} & {\footnotesize ±3.9} & {\footnotesize ±7.9} & {\footnotesize ±4.9} & {\footnotesize ±4.1} & {\footnotesize ±5.0} & {\footnotesize ±3.9} & {\footnotesize ±4.1} & {\footnotesize ±5.2} & {\footnotesize ±7.9} & {\footnotesize ±5.0} & {\footnotesize ±5.2} \\
+    \hline
+    \multirow{2}{*}{ROUGE-Lsum} & {\normalsize 52.6} & {\normalsize 55.1} & {\normalsize 59.2} & {\normalsize 52.6} & {\normalsize 51.3} & {\normalsize 56.4} & {\normalsize 55.3} & {\normalsize 51.4} & {\normalsize 56.2} & {\normalsize 59.3} & {\normalsize 56.5} & {\normalsize 56.0} \\
+                        & {\footnotesize ±4.7} & {\footnotesize ±3.5} & {\footnotesize ±6.7} & {\footnotesize ±4.8} & {\footnotesize ±4.2} & {\footnotesize ±4.3} & {\footnotesize ±3.5} & {\footnotesize ±4.1} & {\footnotesize ±5.0} & {\footnotesize ±6.7} & {\footnotesize ±4.3} & {\footnotesize ±5.1} \\
+    \hline
+    \multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 76.3} & {\normalsize 77.9} & {\normalsize 74.9} & {\normalsize 76.3} & {\normalsize 75.2} & {\normalsize 76.7} & {\normalsize 77.9} & {\normalsize 75.2} & {\normalsize 76.5} & {\normalsize 74.9} & {\normalsize 76.7} & {\normalsize 76.5} \\
+                         & {\footnotesize ±10} & {\footnotesize ±7.5} & {\footnotesize ±13} & {\footnotesize ±10} & {\footnotesize ±9.6} & {\footnotesize ±11} & {\footnotesize ±7.5} & {\footnotesize ±9.6} & {\footnotesize ±10} & {\footnotesize ±13} & {\footnotesize ±11} & {\footnotesize ±10} \\
+    \hline
+    \multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 82.5} & {\normalsize 80.5} & {\normalsize 81.6} & {\normalsize 82.5} & {\normalsize 79.1} & {\normalsize 83.8} & {\normalsize 80.5} & {\normalsize 79.1} & {\normalsize 81.6} & {\normalsize 81.6} & {\normalsize 83.8} & {\normalsize 81.6} \\
+                         & {\footnotesize ±7.7} & {\footnotesize ±6.5} & {\footnotesize ±10} & {\footnotesize ±7.7} & {\footnotesize ±7.7} & {\footnotesize ±8.8} & {\footnotesize ±6.5} & {\footnotesize ±7.7} & {\footnotesize ±8.2} & {\footnotesize ±10} & {\footnotesize ±8.8} & {\footnotesize ±8.2} \\
+    \hline
+  \end{tabular}
+  \caption{Performance comparison of different metrics across various authorial combinations. For each metric, the top value represents the mean and the bottom value represents the standard deviation.}
+  \label{tab:author-consistency}
+\end{table*}
 
 \section{Preparing an Anonymous Submission}
 
