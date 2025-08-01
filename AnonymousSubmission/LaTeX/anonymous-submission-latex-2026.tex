@@ -27,8 +27,8 @@
 \usepackage{listings}
 \DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
 \lstset{%
-	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
-	numbers=left,numberstyle=\footnotesize,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
+	basicstyle={\small\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\small,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
 	aboveskip=0pt,belowskip=0pt,%
 	showstringspaces=false,tabsize=2,breaklines=true}
 \floatstyle{ruled}
@@ -191,7 +191,7 @@ Existing video description evaluation metrics fail to capture the long-range chr
 
 Recent advancements in Large Video Language Models (LVLMs) \citep{Yuan2025Tarsier2,Shen2025LongVU,Ataallah2024Goldfish,Chen2025LongVILA} have enhanced automated video comprehension, enabling long-form description generation from long videos. However, exploratory analysis on long videos reveals that LVLMs frequently (i) miss global narrative structure, (ii) fail to capture local events, and (iii) fail to establish temporal connections while hallucinating content. These gaps indicate LVLMs lack true video comprehension, raising the question: how can we evaluate models' video comprehension? Current benchmarks utilize question-answering formats \citep{wu2024longvideobench,ataallah2024infinibench,nagrani2025neptune} or short-form description comparisons for short videos \citep{wyzs:24,chen:acl11,ZhXuCoAAAI18}, both inadequate to evaluate models' true video comprehension ability. Evaluating genuine comprehension demands shifting to a methodology that processes long or complex videos and requires models to generate long-form descriptions. This approach renders superficial frame-level analysis insufficient, compelling models to instead generate outputs that capture global narrative structure, detail specific local events, and establish their temporal relationships. The quality of these generated descriptions can then be evaluated against the source video or human-written descriptions.
 
-Description-based evaluation methods fall into four categories, each struggling with fundamental aspects of long-form evaluation. N-gram metrics such as BLEU \citep{p:02}, METEOR \citep{bl:05}, CIDEr \citep{v:15}, and ROUGE \citep{l:04} rely on lexical overlap, which not only unfairly penalizes legitimate paraphrases but also rewards superficial word-level matches between descriptions with entirely different global narratives. Embedding-based metrics like BERTScore \citep{z:20} and SBERT \citep{r:19} address lexical limitations through semantic similarity but overlook chronological alignment and local fine-grained details, allowing misordered events and subtle errors to remain undetected. Multimodal metrics such as EMScore \citep{syxl:22} enable direct comparison against source video content but struggle with long videos and long-form descriptions. LLM-based metrics such as CLAIR \citep{chan:23} and AutoDQ \citep{wyzs:24} provide deeper insights but often do not evaluate the chronology of events while suffering from consistency issues.
+Description-based evaluation methods fall into four categories, each struggling with fundamental aspects of long-form evaluation. N-gram metrics such as BLEU \citep{p:02}, METEOR \citep{bl:05}, CIDEr \citep{v:15}, and ROUGE \citep{l:04} rely on lexical overlap, which not only unfairly penalizes legitimate paraphrases but also rewards superficial word-level matches between descriptions with entirely different global narratives. Embedding-based metrics like BERTScore \citep{z:20} and SBERT \citep{r:19} address lexical limitations through semantic similarity but overlook chronological alignment and local fine\-grained details, allowing misordered events and subtle errors to remain undetected. Multimodal metrics such as EMScore \citep{syxl:22} enable direct comparison against source video content but struggle with long videos and long-form descriptions. LLM-based metrics such as CLAIR \citep{chan:23} and AutoDQ \citep{wyzs:24} provide deeper insights but often do not evaluate the chronology of events while suffering from consistency issues.
 
 To address these limitations, we introduce VCS with three components:
 \begin{enumerate}
@@ -216,7 +216,7 @@ Traditional n-gram-based metrics such as BLEU \citep{p:02}, ROUGE \citep{l:04}, 
 
 Embedding-based metrics compare texts in semantic vector spaces, leveraging pretrained models to capture semantic similarity beyond lexical matches. BERTScore computes token-level similarity using contextualized BERT embeddings, aggregating optimal alignments into precision, recall, and F1-scores, while SBERT employs siamese networks with mean-pooling for sentence-level embeddings, but both address expressive variability by recognizing paraphrases yet are constrained by limited context windows, complicating their direct application to long-form descriptions. Recent decoder-based models such as NV-Embed-v2 \citep{l:24}, Linq-Embed-Mistral \citep{cklg:24}, SFR-Embedding-Mistral \citep{mljx:24}, and Jasper and Stella \citep{zlw:24} leverage autoregressive LLM architectures with bidirectional attention, offering significantly larger context windows and robust global embeddings, excelling at paragraph-level semantic assessments. However, reliance on global embeddings and cosine similarity overlooks local content alignment, detailed information accuracy, and chronological alignment.
 
-Multimodal embedding metrics like EMScore \citep{syxl:22} and PAC-S \citep{sbc:23} employ vision-language models such as CLIP \citep{Radford2021LearningTV} to evaluate semantic alignment between visuals and generated captions, addressing expressive variability through direct image-caption comparison, thus bypassing reference captions. EMScore computes video-caption similarity through dual-level matching: coarse-grained alignment between video and caption embeddings, and fine-grained matching between frames and words, calculating precision, recall, and F1-scores via cosine similarity. PAC-S fine-tunes CLIP through positive-augmented contrastive learning with synthetic image-text pairs, then computes cosine similarity scores from the enhanced model. Despite their effectiveness in short-form descriptions, these metrics face computational challenges and methodological limitations when scaling to long-form descriptions.
+Multimodal embedding metrics like EMScore \citep{syxl:22} and PAC-S \citep{sbc:23} employ vision-language models such as CLIP \citep{Radford2021LearningTV} to evaluate semantic alignment between visuals and generated captions, addressing expressive variability through direct image\-caption comparison, thus bypassing reference captions. EMScore computes video-caption similarity through dual-level matching: coarse-grained alignment between video and caption embeddings, and fine-grained matching between frames and words, calculating precision, recall, and F1-scores via cosine similarity. PAC-S fine-tunes CLIP through positive-augmented contrastive learning with synthetic image-text pairs, then computes cosine similarity scores from the enhanced model. Despite their effectiveness in short-form descriptions, these metrics face computational challenges and methodological limitations when scaling to long-form descriptions.
 
 Recent evaluation approaches increasingly leverage Large Language Models (LLMs), categorized into component-based and holistic judge methods. Component-based methods such as AutoDQ \citep{wyzs:24} extract events from descriptions using ChatGPT, then compute precision and recall through entailment analysis comparing extracted events between texts, while VAD-Score \citep{dp:25} employs LLMs for semantic extraction and scoring of events, subjects, and objects, effectively addressing expressive variability but missing chronological evaluation. Holistic methods such as CapScore \citep{li:24} prompt GPT-4 to score caption similarity and quality, CapArena‑Auto Score \citep{cheng:25} uses GPT-4o for pairwise evaluation battles, and CLAIR \citep{chan:23} employs zero-shot prompting for similarity scores with interpretable reasoning. However, these methods suffer from ambiguity in score calibration, sensitivity to prompting nuances, consistency issues across model versions, limited interpretability, and practical constraints including reproducibility and cost.
 
@@ -233,7 +233,7 @@ VCS computes GAS to capture global thematic alignment between reference and gene
 \end{equation}
 
 \paragraph{Text Preprocessing for Chunk-Level Analysis}
-However, GAS lacks sensitivity to fine-grained details and chronological consistency. To enable fine-grained analysis, VCS applies punctuation removal and Segment Any Text (SaT)~\citep{frohmann-etal-2024-segment} segmentation to $T_{ref}$ and $T_{gen}$, producing semantic segments $S_{ref}$ and $S_{gen}$. We group $k$ consecutive segments into chunks $C_{ref} = \{c_1^{ref}, ..., c_{N_{ref}}^{ref}\}$ and $C_{gen} = \{c_1^{gen}, ..., c_{N_{gen}}^{gen}\}$, embedded using NV-Embed-v2 to yield matrices $\mathbf{E}_{C_{ref}} \in \mathbb{R}^{N_{ref} \times D}$ and $\mathbf{E}_{C_{gen}} \in \mathbb{R}^{N_{gen} \times D}$.
+However, GAS lacks sensitivity to fine\-grained details and chronological consistency. To enable fine-grained analysis, VCS applies punctuation removal and Segment Any Text (SaT)~\citep{frohmann-etal-2024-segment} segmentation to $T_{ref}$ and $T_{gen}$, producing semantic segments $S_{ref}$ and $S_{gen}$. We group $k$ consecutive segments into chunks $C_{ref} = \{c_1^{ref}, ..., c_{N_{ref}}^{ref}\}$ and $C_{gen} = \{c_1^{gen}, ..., c_{N_{gen}}^{gen}\}$, embedded using NV-Embed-v2 to yield matrices $\mathbf{E}_{C_{ref}} \in \mathbb{R}^{N_{ref} \times D}$ and $\mathbf{E}_{C_{gen}} \in \mathbb{R}^{N_{gen} \times D}$.
 
 \paragraph{Defining Mapping Windows}
 Before establishing chunk correspondences for fine-grained assessment, VCS constructs a similarity matrix to enable optimal alignments. Given the chunk embedding matrices $\mathbf{E}_{C_{ref}} \in \mathbb{R}^{N_{ref} \times D}$ and $\mathbf{E}_{C_{gen}} \in \mathbb{R}^{N_{gen} \times D}$, we compute similarity matrix $\mathbf{S} \in \mathbb{R}^{N_{ref} \times N_{gen}}$ where $S_{i,j} = \cos(\mathbf{E}_{C_{ref}}[i], \mathbf{E}_{C_{gen}}[j])$ represents the cosine similarity between the $i$-th reference chunk and $j$-th generated chunk.
@@ -332,11 +332,11 @@ VCS &= \frac{S_{min} - (1 - S_{max})}{S_{max}} \label{eq:vcs_final}
 when both components are positive and the numerator exceeds zero, otherwise $VCS = 0$.
 
 \paragraph{Extension for Short-Form Descriptions (VCS$_{short}$)}
-For short-form description evaluation, VCS$_{short}$ adapts the complete VCS methodology to operate at word-level granularity. Input texts undergo cleaning to remove punctuation and stop words, then tokenization into individual words that serve as fundamental elements. These words replace multi-word chunks in all alignment and scoring processes while maintaining identical metric computation and aggregation logic, enabling consistent evaluation across different description lengths.
+For short\-form description evaluation, VCS$_{short}$ adapts the complete VCS methodology to operate at word-level granularity. Input texts undergo cleaning to remove punctuation and stop words, then tokenization into individual words that serve as fundamental elements. These words replace multi-word chunks in all alignment and scoring processes while maintaining identical metric computation and aggregation logic, enabling consistent evaluation across different description lengths.
 
 \section{Dataset Construction}
 
-We construct two synthetic datasets from MPII-MD \citep{rohrbach2015dataset} containing 94 movies with 68,000 annotated segments. We extract 1,390 consecutive scene groups (~500 words each) and use ChatGPT-4o to synthesize coherent narrative descriptions, yielding our base dataset.
+We construct two synthetic datasets from MPII\-MD \citep{rohrbach2015dataset} containing 94 movies with 68,000 annotated segments. We extract 1,390 consecutive scene groups (~500 words each) and use ChatGPT-4o to synthesize coherent narrative descriptions, yielding our base dataset.
 
 \subsection{Corruption Detection Test Set}
 We generate 10 valid variations and 10 invalid corruptions per base description to evaluate VCS ability to distinguish legitimate stylistic changes from content errors. Valid variations include lexical variation, voice transformation, paraphrasing, abstraction (50\%/70\% reduction), elaboration (130\%/150\% expansion), action decomposition/aggregation, and attribute injection while preserving narrative integrity. Invalid corruptions introduce content errors through SAO distortion, ID summarization, hallucination (50\%/80\% unrelated segments), omission (50\%/80\% deletion), sequence inversion, local/global permutation, and sequence rotation. All transformations employ SAT segmentation while preserving segment content integrity, producing 27,800 test instances.
@@ -360,68 +360,68 @@ Table~\ref{tab:corruption-results} presents the performance of VCS compared to t
 
 \begin{table*}[t]
 \centering
-\setlength{\tabcolsep}{0.75mm}
-\normalsize
+\setlength{\tabcolsep}{1mm}
+\small
 \begin{tabular}{l|cccccccccc@{\hskip 4pt}|cccccccccc}
 \hline
 \textbf{Metric} & \multicolumn{10}{c@{\hskip 4pt}}{\textbf{Valid Test Cases}} & \multicolumn{10}{c}{\textbf{Invalid Test Cases}} \\
 \cline{2-11} \cline{12-21}
-& \rotatebox{85}{\small\textbf{Lexical Variation}} &
-\rotatebox{85}{\small\textbf{Voice Transformation}} &
-\rotatebox{85}{\small\textbf{Paraphrasing}} &
-\rotatebox{85}{\small\textbf{Low-Abstraction}} &
-\rotatebox{85}{\small\textbf{High-Abstraction}} &
-\rotatebox{85}{\small\textbf{Low-Elaboration}} &
-\rotatebox{85}{\small\textbf{High-Elaboration}} &
-\rotatebox{85}{\small\textbf{Action Decomposition}} &
-\rotatebox{85}{\small\textbf{Action Aggregation}} &
-\rotatebox{85}{\small\textbf{Attribute Injection}} &
-\rotatebox{85}{\small\textbf{Minor Hallucination}} &
-\rotatebox{85}{\small\textbf{Major Hallucination}} &
-\rotatebox{85}{\small\textbf{Minor Omission}} &
-\rotatebox{85}{\small\textbf{Major Omission}} &
-\rotatebox{85}{\small\textbf{SAO Distortion}} &
-\rotatebox{85}{\small\textbf{Summarization}} &
-\rotatebox{85}{\small\textbf{Local Permutation}} &
-\rotatebox{85}{\small\textbf{Global Permutation}} &
-\rotatebox{85}{\small\textbf{Sequence Inversion}} &
-\rotatebox{85}{\small\textbf{Sequence Rotation}} \\
+& \rotatebox{90}{\small\textbf{Lexical Variation}} &
+\rotatebox{90}{\small\textbf{Voice Transformation}} &
+\rotatebox{90}{\small\textbf{Paraphrasing}} &
+\rotatebox{90}{\small\textbf{Low-Abstraction}} &
+\rotatebox{90}{\small\textbf{High-Abstraction}} &
+\rotatebox{90}{\small\textbf{Low-Elaboration}} &
+\rotatebox{90}{\small\textbf{High-Elaboration}} &
+\rotatebox{90}{\small\textbf{Action Decomposition}} &
+\rotatebox{90}{\small\textbf{Action Aggregation}} &
+\rotatebox{90}{\small\textbf{Attribute Injection}} &
+\rotatebox{90}{\small\textbf{Minor Hallucination}} &
+\rotatebox{90}{\small\textbf{Major Hallucination}} &
+\rotatebox{90}{\small\textbf{Minor Omission}} &
+\rotatebox{90}{\small\textbf{Major Omission}} &
+\rotatebox{90}{\small\textbf{SAO Distortion}} &
+\rotatebox{90}{\small\textbf{Summarization}} &
+\rotatebox{90}{\small\textbf{Local Permutation}} &
+\rotatebox{90}{\small\textbf{Global Permutation}} &
+\rotatebox{90}{\small\textbf{Sequence Inversion}} &
+\rotatebox{90}{\small\textbf{Sequence Rotation}} \\
 \hline
 
-\multirow{2}{*}{BLEU-1} & {\normalsize 83.1} & {\normalsize 79.8} & {\normalsize 69.3} & {\normalsize 38.3} & {\normalsize 23.4} & {\normalsize 66.5} & {\normalsize 55.7} & {\normalsize 57.2} & {\normalsize 34.0} & {\normalsize 69.5} & {\normalsize 53.9} & {\normalsize 43.7} & {\normalsize 38.9} & {\normalsize 3.7} & {\normalsize 49.4} & {\normalsize 8.1} & {\normalsize 99.6} & {\normalsize 99.7} & {\normalsize 99.7} & {\normalsize 99.7} \\
-& {\footnotesize ±8.5} & {\footnotesize ±5.7} & {\footnotesize ±5.6} & {\footnotesize ±14} & {\footnotesize ±11} & {\footnotesize ±8.9} & {\footnotesize ±7.2} & {\footnotesize ±8.9} & {\footnotesize ±12} & {\footnotesize ±6.5} & {\footnotesize ±6.9} & {\footnotesize ±7.0} & {\footnotesize ±7.1} & {\footnotesize ±2.8} & {\footnotesize ±4.6} & {\footnotesize ±5.4} & {\footnotesize ±0.6} & {\footnotesize ±0.5} & {\footnotesize ±0.5} & {\footnotesize ±0.5} \\
+\multirow{2}{*}{BLEU-1} & {\small 83.1} & {\small 79.8} & {\small 69.3} & {\small 38.3} & {\small 23.4} & {\small 66.5} & {\small 55.7} & {\small 57.2} & {\small 34.0} & {\small 69.5} & {\small 53.9} & {\small 43.7} & {\small 38.9} & {\small 3.7} & {\small 49.4} & {\small 8.1} & {\small 99.6} & {\small 99.7} & {\small 99.7} & {\small 99.7} \\
+& {\small ±8.5} & {\small ±5.7} & {\small ±5.6} & {\small ±14} & {\small ±11} & {\small ±8.9} & {\small ±7.2} & {\small ±8.9} & {\small ±12} & {\small ±6.5} & {\small ±6.9} & {\small ±7.0} & {\small ±7.1} & {\small ±2.8} & {\small ±4.6} & {\small ±5.4} & {\small ±0.6} & {\small ±0.5} & {\small ±0.5} & {\small ±0.5} \\
 \cline{2-21}
 
-\multirow{2}{*}{BLEU-4} & {\normalsize 63.2} & {\normalsize 52.8} & {\normalsize 34.9} & {\normalsize 18.6} & {\normalsize 9.40} & {\normalsize 36.5} & {\normalsize 25.5} & {\normalsize 25.1} & {\normalsize 13.1} & {\normalsize 62.5} & {\normalsize 53.5} & {\normalsize 43.3} & {\normalsize 38.4} & {\normalsize 3.60} & {\normalsize 10.5} & {\normalsize 2.20} & {\normalsize 90.0} & {\normalsize 90.4} & {\normalsize 90.2} & {\normalsize 99.2} \\
-& {\footnotesize ±15} & {\footnotesize ±10} & {\footnotesize ±8.3} & {\footnotesize ±11} & {\footnotesize ±7.0} & {\footnotesize ±14} & {\footnotesize ±9.1} & {\footnotesize ±10} & {\footnotesize ±8.3} & {\footnotesize ±8.3} & {\footnotesize ±6.9} & {\footnotesize ±7.0} & {\footnotesize ±7.1} & {\footnotesize ±2.7} & {\footnotesize ±4.6} & {\footnotesize ±2.1} & {\footnotesize ±3.7} & {\footnotesize ±3.7} & {\footnotesize ±3.6} & {\footnotesize ±1.0} \\
+\multirow{2}{*}{BLEU-4} & {\small 63.2} & {\small 52.8} & {\small 34.9} & {\small 18.6} & {\small 9.40} & {\small 36.5} & {\small 25.5} & {\small 25.1} & {\small 13.1} & {\small 62.5} & {\small 53.5} & {\small 43.3} & {\small 38.4} & {\small 3.60} & {\small 10.5} & {\small 2.20} & {\small 90.0} & {\small 90.4} & {\small 90.2} & {\small 99.2} \\
+& {\small ±15} & {\small ±10} & {\small ±8.3} & {\small ±11} & {\small ±7.0} & {\small ±14} & {\small ±9.1} & {\small ±10} & {\small ±8.3} & {\small ±8.3} & {\small ±6.9} & {\small ±7.0} & {\small ±7.1} & {\small ±2.7} & {\small ±4.6} & {\small ±2.1} & {\small ±3.7} & {\small ±3.7} & {\small ±3.6} & {\small ±1.0} \\
 \cline{2-21}
 
-\multirow{2}{*}{METEOR} & {\normalsize 88.1} & {\normalsize 87.0} & {\normalsize 65.5} & {\normalsize 39.2} & {\normalsize 29.5} & {\normalsize 69.7} & {\normalsize 63.2} & {\normalsize 58.7} & {\normalsize 33.4} & {\normalsize 86.3} & {\normalsize 82.6} & {\normalsize 79.4} & {\normalsize 47.1} & {\normalsize 21.0} & {\normalsize 50.2} & {\normalsize 17.7} & {\normalsize 83.7} & {\normalsize 64.4} & {\normalsize 58.9} & {\normalsize 63.2} \\
-& {\footnotesize ±7.1} & {\footnotesize ±5.3} & {\footnotesize ±8.1} & {\footnotesize ±11} & {\footnotesize ±8.2} & {\footnotesize ±11} & {\footnotesize ±8.6} & {\footnotesize ±8.8} & {\footnotesize ±9.0} & {\footnotesize ±4.4} & {\footnotesize ±2.4} & {\footnotesize ±2.9} & {\footnotesize ±4.6} & {\footnotesize ±3.7} & {\footnotesize ±6.3} & {\footnotesize ±4.5} & {\footnotesize ±2.0} & {\footnotesize ±3.4} & {\footnotesize ±3.2} & {\footnotesize ±3.7} \\
+\multirow{2}{*}{METEOR} & {\small 88.1} & {\small 87.0} & {\small 65.5} & {\small 39.2} & {\small 29.5} & {\small 69.7} & {\small 63.2} & {\small 58.7} & {\small 33.4} & {\small 86.3} & {\small 82.6} & {\small 79.4} & {\small 47.1} & {\small 21.0} & {\small 50.2} & {\small 17.7} & {\small 83.7} & {\small 64.4} & {\small 58.9} & {\small 63.2} \\
+& {\small ±7.1} & {\small ±5.3} & {\small ±8.1} & {\small ±11} & {\small ±8.2} & {\small ±11} & {\small ±8.6} & {\small ±8.8} & {\small ±9.0} & {\small ±4.4} & {\small ±2.4} & {\small ±2.9} & {\small ±4.6} & {\small ±3.7} & {\small ±6.3} & {\small ±4.5} & {\small ±2.0} & {\small ±3.4} & {\small ±3.2} & {\small ±3.7} \\
 \cline{2-21}
 
-\multirow{2}{*}{ROUGE-1} & {\normalsize 84.0} & {\normalsize 89.7} & {\normalsize 74.9} & {\normalsize 64.0} & {\normalsize 54.1} & {\normalsize 77.3} & {\normalsize 69.9} & {\normalsize 69.5} & {\normalsize 58.1} & {\normalsize 81.8} & {\normalsize 69.7} & {\normalsize 60.4} & {\normalsize 67.0} & {\normalsize 36.0} & {\normalsize 51.4} & {\normalsize 37.2} & {\normalsize 98.9} & {\normalsize 99.0} & {\normalsize 99.0} & {\normalsize 99.0} \\
-& {\footnotesize ±8.1} & {\footnotesize ±3.1} & {\footnotesize ±4.3} & {\footnotesize ±9.6} & {\footnotesize ±9.2} & {\footnotesize ±6.8} & {\footnotesize ±6.0} & {\footnotesize ±7.1} & {\footnotesize ±9.3} & {\footnotesize ±4.6} & {\footnotesize ±5.9} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±4.4} & {\footnotesize ±7.0} & {\footnotesize ±0.9} & {\footnotesize ±0.9} & {\footnotesize ±0.9} & {\footnotesize ±0.9} \\
+\multirow{2}{*}{ROUGE-1} & {\small 84.0} & {\small 89.7} & {\small 74.9} & {\small 64.0} & {\small 54.1} & {\small 77.3} & {\small 69.9} & {\small 69.5} & {\small 58.1} & {\small 81.8} & {\small 69.7} & {\small 60.4} & {\small 67.0} & {\small 36.0} & {\small 51.4} & {\small 37.2} & {\small 98.9} & {\small 99.0} & {\small 99.0} & {\small 99.0} \\
+& {\small ±8.1} & {\small ±3.1} & {\small ±4.3} & {\small ±9.6} & {\small ±9.2} & {\small ±6.8} & {\small ±6.0} & {\small ±7.1} & {\small ±9.3} & {\small ±4.6} & {\small ±5.9} & {\small ±7.0} & {\small ±4.3} & {\small ±5.3} & {\small ±4.4} & {\small ±7.0} & {\small ±0.9} & {\small ±0.9} & {\small ±0.9} & {\small ±0.9} \\
 \cline{2-21}
 
-\multirow{2}{*}{ROUGE-4} & {\normalsize 50.3} & {\normalsize 41.0} & {\normalsize 20.4} & {\normalsize 15.7} & {\normalsize 8.90} & {\normalsize 25.6} & {\normalsize 16.4} & {\normalsize 15.3} & {\normalsize 9.50} & {\normalsize 66.3} & {\normalsize 67.3} & {\normalsize 58.4} & {\normalsize 64.2} & {\normalsize 33.4} & {\normalsize 2.50} & {\normalsize 2.90} & {\normalsize 78.9} & {\normalsize 79.6} & {\normalsize 79.2} & {\normalsize 96.2} \\
-& {\footnotesize ±18} & {\footnotesize ±12} & {\footnotesize ±7.5} & {\footnotesize ±10} & {\footnotesize ±6.2} & {\footnotesize ±15} & {\footnotesize ±8.9} & {\footnotesize ±10} & {\footnotesize ±6.7} & {\footnotesize ±9.3} & {\footnotesize ±6.1} & {\footnotesize ±7.0} & {\footnotesize ±4.8} & {\footnotesize ±5.5} & {\footnotesize ±2.0} & {\footnotesize ±2.3} & {\footnotesize ±6.6} & {\footnotesize ±6.6} & {\footnotesize ±6.6} & {\footnotesize ±2.7} \\
+\multirow{2}{*}{ROUGE-4} & {\small 50.3} & {\small 41.0} & {\small 20.4} & {\small 15.7} & {\small 8.90} & {\small 25.6} & {\small 16.4} & {\small 15.3} & {\small 9.50} & {\small 66.3} & {\small 67.3} & {\small 58.4} & {\small 64.2} & {\small 33.4} & {\small 2.50} & {\small 2.90} & {\small 78.9} & {\small 79.6} & {\small 79.2} & {\small 96.2} \\
+& {\small ±18} & {\small ±12} & {\small ±7.5} & {\small ±10} & {\small ±6.2} & {\small ±15} & {\small ±8.9} & {\small ±10} & {\small ±6.7} & {\small ±9.3} & {\small ±6.1} & {\small ±7.0} & {\small ±4.8} & {\small ±5.5} & {\small ±2.0} & {\small ±2.3} & {\small ±6.6} & {\small ±6.6} & {\small ±6.6} & {\small ±2.7} \\
 \cline{2-21}
 
-\multirow{2}{*}{ROUGE-L} & {\normalsize 83.5} & {\normalsize 75.4} & {\normalsize 67.0} & {\normalsize 55.6} & {\normalsize 45.6} & {\normalsize 69.7} & {\normalsize 60.6} & {\normalsize 57.6} & {\normalsize 45.2} & {\normalsize 81.6} & {\normalsize 69.6} & {\normalsize 60.3} & {\normalsize 66.9} & {\normalsize 36.0} & {\normalsize 47.2} & {\normalsize 27.4} & {\normalsize 65.1} & {\normalsize 36.5} & {\normalsize 23.1} & {\normalsize 53.5} \\
-& {\footnotesize ±8.4} & {\footnotesize ±6.5} & {\footnotesize ±6.0} & {\footnotesize ±11} & {\footnotesize ±9.8} & {\footnotesize ±10} & {\footnotesize ±8.4} & {\footnotesize ±9.6} & {\footnotesize ±10} & {\footnotesize ±4.7} & {\footnotesize ±6.0} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±5.4} & {\footnotesize ±6.4} & {\footnotesize ±2.7} & {\footnotesize ±4.6} & {\footnotesize ±2.3} & {\footnotesize ±3.2} \\
+\multirow{2}{*}{ROUGE-L} & {\small 83.5} & {\small 75.4} & {\small 67.0} & {\small 55.6} & {\small 45.6} & {\small 69.7} & {\small 60.6} & {\small 57.6} & {\small 45.2} & {\small 81.6} & {\small 69.6} & {\small 60.3} & {\small 66.9} & {\small 36.0} & {\small 47.2} & {\small 27.4} & {\small 65.1} & {\small 36.5} & {\small 23.1} & {\small 53.5} \\
+& {\small ±8.4} & {\small ±6.5} & {\small ±6.0} & {\small ±11} & {\small ±9.8} & {\small ±10} & {\small ±8.4} & {\small ±9.6} & {\small ±10} & {\small ±4.7} & {\small ±6.0} & {\small ±7.0} & {\small ±4.3} & {\small ±5.3} & {\small ±5.4} & {\small ±6.4} & {\small ±2.7} & {\small ±4.6} & {\small ±2.3} & {\small ±3.2} \\
 \cline{2-21}
 
-\multirow{2}{*}{ROUGE-Lsum} & {\normalsize 83.8} & {\normalsize 84.7} & {\normalsize 73.4} & {\normalsize 62.1} & {\normalsize 52.1} & {\normalsize 76.0} & {\normalsize 68.4} & {\normalsize 67.5} & {\normalsize 55.4} & {\normalsize 81.8} & {\normalsize 69.7} & {\normalsize 60.4} & {\normalsize 67.0} & {\normalsize 36.0} & {\normalsize 50.7} & {\normalsize 35.2} & {\normalsize 97.7} & {\normalsize 97.7} & {\normalsize 96.7} & {\normalsize 98.8} \\
-& {\footnotesize ±8.2} & {\footnotesize ±4.1} & {\footnotesize ±4.5} & {\footnotesize ±10} & {\footnotesize ±9.4} & {\footnotesize ±7.3} & {\footnotesize ±6.3} & {\footnotesize ±7.4} & {\footnotesize ±9.3} & {\footnotesize ±4.6} & {\footnotesize ±5.9} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±4.5} & {\footnotesize ±6.8} & {\footnotesize ±1.7} & {\footnotesize ±1.9} & {\footnotesize ±2.4} & {\footnotesize ±1.1} \\
+\multirow{2}{*}{ROUGE-Lsum} & {\small 83.8} & {\small 84.7} & {\small 73.4} & {\small 62.1} & {\small 52.1} & {\small 76.0} & {\small 68.4} & {\small 67.5} & {\small 55.4} & {\small 81.8} & {\small 69.7} & {\small 60.4} & {\small 67.0} & {\small 36.0} & {\small 50.7} & {\small 35.2} & {\small 97.7} & {\small 97.7} & {\small 96.7} & {\small 98.8} \\
+& {\small ±8.2} & {\small ±4.1} & {\small ±4.5} & {\small ±10} & {\small ±9.4} & {\small ±7.3} & {\small ±6.3} & {\small ±7.4} & {\small ±9.3} & {\small ±4.6} & {\small ±5.9} & {\small ±7.0} & {\small ±4.3} & {\small ±5.3} & {\small ±4.5} & {\small ±6.8} & {\small ±1.7} & {\small ±1.9} & {\small ±2.4} & {\small ±1.1} \\
 \hline
 
-\multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 93.7} & {\normalsize 95.1} & {\normalsize 95.8} & {\normalsize 86.0} & {\normalsize 80.0} & {\normalsize 92.2} & {\normalsize 87.5} & {\normalsize 88.5} & {\normalsize 81.0} & {\normalsize 86.4} & {\normalsize 69.1} & {\normalsize 53.4} & {\normalsize 62.2} & {\normalsize 1.90} & {\normalsize 5.00} & {\normalsize 62.4} & {\normalsize 0.70} & {\normalsize 3.40} & {\normalsize 0.10} & {\normalsize 42.9} \\
-& {\footnotesize ±7.1} & {\footnotesize ±3.7} & {\footnotesize ±2.8} & {\footnotesize ±8.8} & {\footnotesize ±10} & {\footnotesize ±4.6} & {\footnotesize ±5.4} & {\footnotesize ±5.9} & {\footnotesize ±10} & {\footnotesize ±4.7} & {\footnotesize ±6.8} & {\footnotesize ±14} & {\footnotesize ±4.9} & {\footnotesize ±4.9} & {\footnotesize ±10} & {\footnotesize ±18} & {\footnotesize ±2.3} & {\footnotesize ±4.4} & {\footnotesize ±0.8} & {\footnotesize ±2.8} \\
+\multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\small 93.7} & {\small 95.1} & {\small 95.8} & {\small 86.0} & {\small 80.0} & {\small 92.2} & {\small 87.5} & {\small 88.5} & {\small 81.0} & {\small 86.4} & {\small 69.1} & {\small 53.4} & {\small 62.2} & {\small 1.90} & {\small 5.00} & {\small 62.4} & {\small 0.70} & {\small 3.40} & {\small 0.10} & {\small 42.9} \\
+& {\small ±7.1} & {\small ±3.7} & {\small ±2.8} & {\small ±8.8} & {\small ±10} & {\small ±4.6} & {\small ±5.4} & {\small ±5.9} & {\small ±10} & {\small ±4.7} & {\small ±6.8} & {\small ±14} & {\small ±4.9} & {\small ±4.9} & {\small ±10} & {\small ±18} & {\small ±2.3} & {\small ±4.4} & {\small ±0.8} & {\small ±2.8} \\
 \cline{2-21}
 
-\multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 94.1} & {\normalsize 96.7} & {\normalsize 96.7} & {\normalsize 90.5} & {\normalsize 86.3} & {\normalsize 93.5} & {\normalsize 88.7} & {\normalsize 90.4} & {\normalsize 86.9} & {\normalsize 86.8} & {\normalsize 70.5} & {\normalsize 54.9} & {\normalsize 68.3} & {\normalsize 6.70} & {\normalsize 5.40} & {\normalsize 73.5} & {\normalsize 76.1} & {\normalsize 15.2} & {\normalsize 43.6} & {\normalsize 43.0} \\
-& {\footnotesize ±7.1} & {\footnotesize ±2.6} & {\footnotesize ±1.8} & {\footnotesize ±5.8} & {\footnotesize ±6.5} & {\footnotesize ±3.9} & {\footnotesize ±5.0} & {\footnotesize ±5.2} & {\footnotesize ±6.9} & {\footnotesize ±4.5} & {\footnotesize ±7.0} & {\footnotesize ±14} & {\footnotesize ±4.6} & {\footnotesize ±10} & {\footnotesize ±10} & {\footnotesize ±12} & {\footnotesize ±6.5} & {\footnotesize ±7.6} & {\footnotesize ±2.4} & {\footnotesize ±2.8} \\
+\multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\small 94.1} & {\small 96.7} & {\small 96.7} & {\small 90.5} & {\small 86.3} & {\small 93.5} & {\small 88.7} & {\small 90.4} & {\small 86.9} & {\small 86.8} & {\small 70.5} & {\small 54.9} & {\small 68.3} & {\small 6.70} & {\small 5.40} & {\small 73.5} & {\small 76.1} & {\small 15.2} & {\small 43.6} & {\small 43.0} \\
+& {\small ±7.1} & {\small ±2.6} & {\small ±1.8} & {\small ±5.8} & {\small ±6.5} & {\small ±3.9} & {\small ±5.0} & {\small ±5.2} & {\small ±6.9} & {\small ±4.5} & {\small ±7.0} & {\small ±14} & {\small ±4.6} & {\small ±10} & {\small ±10} & {\small ±12} & {\small ±6.5} & {\small ±7.6} & {\small ±2.4} & {\small ±2.8} \\
 \hline
 \end{tabular}
 \caption{Corruption detection performance across various text transformations. Valid Test Cases represent legitimate variations that should receive high scores, while Invalid Test Cases represent corruptions that should receive low scores. For each metric, the top value represents the mean and the bottom value represents the standard deviation. VCS consistently outperforms traditional metrics by maintaining high scores for valid variations while effectively detecting corruptions.}
@@ -434,9 +434,9 @@ Table~\ref{tab:vatex-eval} presents human judgment correlation scores on the VAT
 
 \begin{table}[t]
   \centering
-  \normalsize
-  \setlength{\tabcolsep}{0.75mm}
-  \begin{tabular}{l@{\hspace{0.1mm}}cccc}
+  \small
+  \setlength{\tabcolsep}{1mm}
+  \begin{tabular}{l@{\hspace{0.05mm}}cccc}
     \hline
     & \multicolumn{2}{c}{\textbf{1Ref}} & \multicolumn{2}{c}{\textbf{9Refs}} \\
     \cline{2-3} \cline{4-5}
@@ -469,40 +469,40 @@ Table~\ref{tab:author-consistency} presents performance comparison of different 
 
 \begin{table*}[t]
   \centering
-  \normalsize
-  \setlength{\tabcolsep}{0.75mm}
+  \small
+  \setlength{\tabcolsep}{1mm}
   \begin{tabular}{l@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}@{\hspace{5mm}}*{3}{c}}
     \hline
     \textbf{Metric} & \multicolumn{3}{c}{\textbf{Author 1}} & \multicolumn{3}{c}{\textbf{Author 2}} & \multicolumn{3}{c}{\textbf{Author 3}} & \multicolumn{3}{c}{\textbf{Author 4}} \\
     \cline{2-4} \cline{5-7} \cline{8-10} \cline{11-13}
                     & A1-A2 & A1-A3 & A1-A4 & A2-A1 & A2-A3 & A2-A4 & A3-A1 & A3-A2 & A3-A4 & A4-A1 & A4-A2 & A4-A3 \\
     \hline
-    \multirow{2}{*}{BLEU-1} & {\normalsize 45.1} & {\normalsize 46.3} & {\normalsize 52.4} & {\normalsize 46.4} & {\normalsize 39.4} & {\normalsize 50.8} & {\normalsize 43.8} & {\normalsize 33.7} & {\normalsize 40.2} & {\normalsize 53.3} & {\normalsize 50.2} & {\normalsize 44.7} \\
-                    & {\footnotesize ±6.7} & {\footnotesize ±4.3} & {\footnotesize ±9.2} & {\footnotesize ±5.9} & {\footnotesize ±5.0} & {\footnotesize ±5.7} & {\footnotesize ±5.8} & {\footnotesize ±6.8} & {\footnotesize ±9.3} & {\footnotesize ±8.2} & {\footnotesize ±6.3} & {\footnotesize ±6.8} \\
+    \multirow{2}{*}{BLEU-1} & {\small 45.1} & {\small 46.3} & {\small 52.4} & {\small 46.4} & {\small 39.4} & {\small 50.8} & {\small 43.8} & {\small 33.7} & {\small 40.2} & {\small 53.3} & {\small 50.2} & {\small 44.7} \\
+                    & {\small ±6.7} & {\small ±4.3} & {\small ±9.2} & {\small ±5.9} & {\small ±5.0} & {\small ±5.7} & {\small ±5.8} & {\small ±6.8} & {\small ±9.3} & {\small ±8.2} & {\small ±6.3} & {\small ±6.8} \\
     \hline
-    \multirow{2}{*}{BLEU-4} & {\normalsize 9.30} & {\normalsize 9.70} & {\normalsize 15.2} & {\normalsize 9.60} & {\normalsize 8.10} & {\normalsize 12.0} & {\normalsize 9.20} & {\normalsize 7.00} & {\normalsize 9.70} & {\normalsize 15.4} & {\normalsize 11.9} & {\normalsize 10.7} \\
-                    & {\footnotesize ±3.5} & {\footnotesize ±2.6} & {\footnotesize ±7.0} & {\footnotesize ±3.5} & {\footnotesize ±2.6} & {\footnotesize ±3.9} & {\footnotesize ±2.6} & {\footnotesize ±2.6} & {\footnotesize ±3.7} & {\footnotesize ±6.9} & {\footnotesize ±3.9} & {\footnotesize ±3.5} \\
+    \multirow{2}{*}{BLEU-4} & {\small 9.30} & {\small 9.70} & {\small 15.2} & {\small 9.60} & {\small 8.10} & {\small 12.0} & {\small 9.20} & {\small 7.00} & {\small 9.70} & {\small 15.4} & {\small 11.9} & {\small 10.7} \\
+                    & {\small ±3.5} & {\small ±2.6} & {\small ±7.0} & {\small ±3.5} & {\small ±2.6} & {\small ±3.9} & {\small ±2.6} & {\small ±2.6} & {\small ±3.7} & {\small ±6.9} & {\small ±3.9} & {\small ±3.5} \\
     \hline
-    \multirow{2}{*}{METEOR} & {\normalsize 35.2} & {\normalsize 42.9} & {\normalsize 41.6} & {\normalsize 41.1} & {\normalsize 43.5} & {\normalsize 42.8} & {\normalsize 33.5} & {\normalsize 29.0} & {\normalsize 33.9} & {\normalsize 43.1} & {\normalsize 38.1} & {\normalsize 44.8} \\
-                    & {\footnotesize ±5.0} & {\footnotesize ±3.5} & {\footnotesize ±7.6} & {\footnotesize ±3.8} & {\footnotesize ±3.0} & {\footnotesize ±4.4} & {\footnotesize ±3.3} & {\footnotesize ±3.9} & {\footnotesize ±5.4} & {\footnotesize ±7.5} & {\footnotesize ±6.4} & {\footnotesize ±5.5} \\
+    \multirow{2}{*}{METEOR} & {\small 35.2} & {\small 42.9} & {\small 41.6} & {\small 41.1} & {\small 43.5} & {\small 42.8} & {\small 33.5} & {\small 29.0} & {\small 33.9} & {\small 43.1} & {\small 38.1} & {\small 44.8} \\
+                    & {\small ±5.0} & {\small ±3.5} & {\small ±7.6} & {\small ±3.8} & {\small ±3.0} & {\small ±4.4} & {\small ±3.3} & {\small ±3.9} & {\small ±5.4} & {\small ±7.5} & {\small ±6.4} & {\small ±5.5} \\
     \hline
-    \multirow{2}{*}{ROUGE-1} & {\normalsize 56.0} & {\normalsize 57.8} & {\normalsize 62.1} & {\normalsize 56.0} & {\normalsize 55.2} & {\normalsize 60.2} & {\normalsize 57.8} & {\normalsize 55.2} & {\normalsize 59.4} & {\normalsize 62.1} & {\normalsize 60.2} & {\normalsize 59.4} \\
-                     & {\footnotesize ±4.8} & {\footnotesize ±3.4} & {\footnotesize ±6.6} & {\footnotesize ±4.8} & {\footnotesize ±4.2} & {\footnotesize ±4.3} & {\footnotesize ±3.4} & {\footnotesize ±4.2} & {\footnotesize ±5.0} & {\footnotesize ±6.6} & {\footnotesize ±4.3} & {\footnotesize ±5.0} \\
+    \multirow{2}{*}{ROUGE-1} & {\small 56.0} & {\small 57.8} & {\small 62.1} & {\small 56.0} & {\small 55.2} & {\small 60.2} & {\small 57.8} & {\small 55.2} & {\small 59.4} & {\small 62.1} & {\small 60.2} & {\small 59.4} \\
+                     & {\small ±4.8} & {\small ±3.4} & {\small ±6.6} & {\small ±4.8} & {\small ±4.2} & {\small ±4.3} & {\small ±3.4} & {\small ±4.2} & {\small ±5.0} & {\small ±6.6} & {\small ±4.3} & {\small ±5.0} \\
     \hline
-    \multirow{2}{*}{ROUGE-4} & {\normalsize 3.00} & {\normalsize 3.20} & {\normalsize 6.60} & {\normalsize 3.00} & {\normalsize 3.20} & {\normalsize 4.50} & {\normalsize 3.20} & {\normalsize 3.20} & {\normalsize 4.40} & {\normalsize 6.60} & {\normalsize 4.50} & {\normalsize 4.40} \\
-                     & {\footnotesize ±1.8} & {\footnotesize ±1.5} & {\footnotesize ±4.9} & {\footnotesize ±1.8} & {\footnotesize ±1.5} & {\footnotesize ±2.3} & {\footnotesize ±1.5} & {\footnotesize ±1.5} & {\footnotesize ±2.1} & {\footnotesize ±4.9} & {\footnotesize ±2.3} & {\footnotesize ±2.1} \\
+    \multirow{2}{*}{ROUGE-4} & {\small 3.00} & {\small 3.20} & {\small 6.60} & {\small 3.00} & {\small 3.20} & {\small 4.50} & {\small 3.20} & {\small 3.20} & {\small 4.40} & {\small 6.60} & {\small 4.50} & {\small 4.40} \\
+                     & {\small ±1.8} & {\small ±1.5} & {\small ±4.9} & {\small ±1.8} & {\small ±1.5} & {\small ±2.3} & {\small ±1.5} & {\small ±1.5} & {\small ±2.1} & {\small ±4.9} & {\small ±2.3} & {\small ±2.1} \\
     \hline
-    \multirow{2}{*}{ROUGE-L} & {\normalsize 36.6} & {\normalsize 40.4} & {\normalsize 43.8} & {\normalsize 36.6} & {\normalsize 34.9} & {\normalsize 38.3} & {\normalsize 40.4} & {\normalsize 34.9} & {\normalsize 38.8} & {\normalsize 43.8} & {\normalsize 38.3} & {\normalsize 38.8} \\
-                     & {\footnotesize ±4.9} & {\footnotesize ±3.9} & {\footnotesize ±7.9} & {\footnotesize ±4.9} & {\footnotesize ±4.1} & {\footnotesize ±5.0} & {\footnotesize ±3.9} & {\footnotesize ±4.1} & {\footnotesize ±5.2} & {\footnotesize ±7.9} & {\footnotesize ±5.0} & {\footnotesize ±5.2} \\
+    \multirow{2}{*}{ROUGE-L} & {\small 36.6} & {\small 40.4} & {\small 43.8} & {\small 36.6} & {\small 34.9} & {\small 38.3} & {\small 40.4} & {\small 34.9} & {\small 38.8} & {\small 43.8} & {\small 38.3} & {\small 38.8} \\
+                     & {\small ±4.9} & {\small ±3.9} & {\small ±7.9} & {\small ±4.9} & {\small ±4.1} & {\small ±5.0} & {\small ±3.9} & {\small ±4.1} & {\small ±5.2} & {\small ±7.9} & {\small ±5.0} & {\small ±5.2} \\
     \hline
-    \multirow{2}{*}{ROUGE-Lsum} & {\normalsize 52.6} & {\normalsize 55.1} & {\normalsize 59.2} & {\normalsize 52.6} & {\normalsize 51.3} & {\normalsize 56.4} & {\normalsize 55.3} & {\normalsize 51.4} & {\normalsize 56.2} & {\normalsize 59.3} & {\normalsize 56.5} & {\normalsize 56.0} \\
-                        & {\footnotesize ±4.7} & {\footnotesize ±3.5} & {\footnotesize ±6.7} & {\footnotesize ±4.8} & {\footnotesize ±4.2} & {\footnotesize ±4.3} & {\footnotesize ±3.5} & {\footnotesize ±4.1} & {\footnotesize ±5.0} & {\footnotesize ±6.7} & {\footnotesize ±4.3} & {\footnotesize ±5.1} \\
+    \multirow{2}{*}{ROUGE-Lsum} & {\small 52.6} & {\small 55.1} & {\small 59.2} & {\small 52.6} & {\small 51.3} & {\small 56.4} & {\small 55.3} & {\small 51.4} & {\small 56.2} & {\small 59.3} & {\small 56.5} & {\small 56.0} \\
+                        & {\small ±4.7} & {\small ±3.5} & {\small ±6.7} & {\small ±4.8} & {\small ±4.2} & {\small ±4.3} & {\small ±3.5} & {\small ±4.1} & {\small ±5.0} & {\small ±6.7} & {\small ±4.3} & {\small ±5.1} \\
     \hline
-    \multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 76.3} & {\normalsize 77.9} & {\normalsize 74.9} & {\normalsize 76.3} & {\normalsize 75.2} & {\normalsize 76.7} & {\normalsize 77.9} & {\normalsize 75.2} & {\normalsize 76.5} & {\normalsize 74.9} & {\normalsize 76.7} & {\normalsize 76.5} \\
-                         & {\footnotesize ±10} & {\footnotesize ±7.5} & {\footnotesize ±13} & {\footnotesize ±10} & {\footnotesize ±9.6} & {\footnotesize ±11} & {\footnotesize ±7.5} & {\footnotesize ±9.6} & {\footnotesize ±10} & {\footnotesize ±13} & {\footnotesize ±11} & {\footnotesize ±10} \\
+    \multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\small 76.3} & {\small 77.9} & {\small 74.9} & {\small 76.3} & {\small 75.2} & {\small 76.7} & {\small 77.9} & {\small 75.2} & {\small 76.5} & {\small 74.9} & {\small 76.7} & {\small 76.5} \\
+                         & {\small ±10} & {\small ±7.5} & {\small ±13} & {\small ±10} & {\small ±9.6} & {\small ±11} & {\small ±7.5} & {\small ±9.6} & {\small ±10} & {\small ±13} & {\small ±11} & {\small ±10} \\
     \hline
-    \multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 82.5} & {\normalsize 80.5} & {\normalsize 81.6} & {\normalsize 82.5} & {\normalsize 79.1} & {\normalsize 83.8} & {\normalsize 80.5} & {\normalsize 79.1} & {\normalsize 81.6} & {\normalsize 81.6} & {\normalsize 83.8} & {\normalsize 81.6} \\
-                         & {\footnotesize ±7.7} & {\footnotesize ±6.5} & {\footnotesize ±10} & {\footnotesize ±7.7} & {\footnotesize ±7.7} & {\footnotesize ±8.8} & {\footnotesize ±6.5} & {\footnotesize ±7.7} & {\footnotesize ±8.2} & {\footnotesize ±10} & {\footnotesize ±8.8} & {\footnotesize ±8.2} \\
+    \multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\small 82.5} & {\small 80.5} & {\small 81.6} & {\small 82.5} & {\small 79.1} & {\small 83.8} & {\small 80.5} & {\small 79.1} & {\small 81.6} & {\small 81.6} & {\small 83.8} & {\small 81.6} \\
+                         & {\small ±7.7} & {\small ±6.5} & {\small ±10} & {\small ±7.7} & {\small ±7.7} & {\small ±8.8} & {\small ±6.5} & {\small ±7.7} & {\small ±8.2} & {\small ±10} & {\small ±8.8} & {\small ±8.2} \\
     \hline
   \end{tabular}
   \caption{Performance comparison of different metrics across various authorial combinations. For each metric, the top value represents the mean and the bottom value represents the standard deviation.}
@@ -816,7 +816,7 @@ Author information has to be set according to the following specification depend
 \begin{quote}\begin{scriptsize}\begin{verbatim}
 \author{
     AuthorOne\equalcontrib\textsuperscript{\rm 1,\rm 2},
-    AuthorTwo\equalcontrib\textsuperscript{\rm 2},
+    AuthorTwo\equalcontrib\textsuperscript{\rm 2},\\
     AuthorThree\textsuperscript{\rm 3},\\
     AuthorFour\textsuperscript{\rm 4},
     AuthorFive \textsuperscript{\rm 5}}
