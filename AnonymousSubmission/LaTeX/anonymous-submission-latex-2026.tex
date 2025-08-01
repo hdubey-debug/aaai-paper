@@ -276,13 +276,15 @@ h_{LCT} = \lceil y/x \rceil - 1[y > x \land 0 < \text{frac}(y/x) \leq 0.5]
 
 where $y = N_{ref}$ and $x = N_{gen}$ for $NAS_{D,prec}$, and the reverse for $NAS_{D,rec}$. A user-defined multiplier $\tau_{LCT} \geq 0$ expands each Mapping Window by $\tau_{LCT} \cdot h_{LCT}$ rows. Chunks matching within this expanded window receive zero penalty.
 
-For chunks falling outside this tolerance zone, distance penalties are calculated based on their offset from the original Mapping Window boundary. Consider an evaluation chunk $c_j^{eval}$ matched to opposite chunk $c_i^{opp}$, where $c_j^{eval}$ has Mapping Window $MW_{eval}[j] = [s_j, e_j)$. The raw offset is $d_{ij} = s_j - i$ when $i < s_j$ or $d_{ij} = i - (e_j - 1)$ when $i \geq e_j$. The LCT-adjusted per-chunk penalty becomes $p_{ij} = 0$ if $d_{ij} \leq \tau_{LCT} h_{LCT}$ (within tolerance), otherwise $p_{ij} = d_{ij}/N_{eval}$. The orientation score is computed as:
+For chunks falling outside this tolerance zone, distance penalties are calculated based on their offset from the original Mapping Window boundary. Consider an evaluation chunk matched to its opposite counterpart, where the evaluation chunk has a corresponding Mapping Window. If the matched chunk appears above its expected window, the raw offset measures how many rows it sits above the window start. If the matched chunk appears below its expected window, the raw offset measures how many rows it sits below the window end. The LCT-adjusted penalty becomes zero if this raw offset falls within the tolerance threshold, otherwise the penalty equals the raw offset normalized by the evaluation timeline length.
+
+Let $P_{total}$ be the sum of all penalties across matched pairs, and $P_{max}$ be the worst-case penalty when all chunks drift to their furthest possible positions. The orientation score is computed as:
 
 \begin{equation}
-NAS_{D,*} = 1 - \frac{\sum_{(j,i) \in M_{eval}} p_{ij}}{N_{eval}^{-1} \sum_j \max(s_j, N_{eval} - e_j)}
+NAS_{D,*} = 1 - \frac{P_{total}}{P_{max}}
 \end{equation}
 
-where the numerator sums penalties over all matched pairs and the denominator represents the worst-case penalty when all chunks drift to furthest positions. For precision, $eval = gen$, $opp = ref$, $M_{eval} = M_P$, and $MW_{eval} = MW_{prec}$; for recall, $eval = ref$, $opp = gen$, $M_{eval} = M_R$, and $MW_{eval} = MW_{rec}$. The final score combines both orientations:
+For precision, $eval = gen$, $opp = ref$, $M_{eval} = M_P$, and $MW_{eval} = MW_{prec}$; for recall, $eval = ref$, $opp = gen$, $M_{eval} = M_R$, and $MW_{eval} = MW_{rec}$. The final score combines both orientations:
 
 \begin{equation}
 NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}}
