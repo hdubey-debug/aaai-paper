@@ -254,8 +254,6 @@ This combination effectively mitigates both collision and ambiguity. In the earl
 \paragraph{Local Alignment Score (LAS)}
 Having obtained the correspondence sets $M_P$ and $M_R$ from the Best-Matching Algorithm, VCS computes the Local Alignment Score by averaging cosine similarities of matched chunk pairs. The precision component $LAS_P$ evaluates how well generated text aligns with reference text, while recall component $LAS_R$ evaluates the reverse. LAS is their harmonic mean: $LAS = \frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R}$. However, LAS remains insensitive to chronological ordering, necessitating narrative assessment through NAS.
 
-High LAS indicates strong local semantic agreement, though it remains insensitive to chronological order, necessitating narrative assessment.
-
 \paragraph{Narrative Alignment Score (NAS)}
 NAS evaluates chronological alignment and narrative integrity using the matched pairs $M_P$ and $M_R$ established by the Best Matching Algorithm. It addresses LAS's order insensitivity through two complementary approaches: distance-based penalties for positional deviations and line-based path analysis for narrative flow assessment.
 
