@@ -260,14 +260,7 @@ Having obtained the correspondence sets $M_P$ and $M_R$ from the Best-Matching A
 NAS evaluates chronological alignment and narrative integrity using the matched pairs $M_P$ and $M_R$ established by the Best Matching Algorithm. It addresses LAS's order insensitivity through two complementary approaches: distance-based penalties for positional deviations and line-based path analysis for narrative flow assessment.
 
 \paragraph{Distance-based NAS ($NAS_D$)}
-From the correspondence sets $M_P$ (generated → reference) and $M_R$ (reference → generated) produced by the Best-Matching Algorithm, $NAS_D$ penalises any match that drifts outside its Mapping Window. In a given orientation let $N_{eval}$ be the length of the timeline being evaluated and $N_{opp}$ the length of the opposite timeline. A local-chronology-tolerance height
-
-\begin{align}
-h_{LCT} &= \lceil N_{eval}/N_{opp} \rceil \\
-&\quad - 1[N_{eval} > N_{opp} \land 0 < \text{frac}(N_{eval}/N_{opp}) \leq 0.5]
-\end{align}
-
-is first derived from the Mapping-Window height, and each window is expanded symmetrically by $\tau_{LCT} h_{LCT}$ rows ($\tau_{LCT} \geq 0$ is user-set). For a match at row $k$ with window $[s,e)$ the raw offset is $d(k) = s - k$ when $k < s$ or $k - (e-1)$ when $k \geq e$; the LCT-adjusted per-chunk penalty becomes $p(k) = \max\{0, d(k) - \tau_{LCT} h_{LCT}\}/N_{eval}$. Summing over all windows yields $P_{total}$; the worst-case penalty for the same window layout is $P_{max} = N_{eval}^{-1} \sum_j \max(s_j, N_{eval} - e_j)$. The orientation score is $NAS_{D,*} = 1 - P_{total}/P_{max}$, and the two orientations are fused by the harmonic mean
+From the correspondence sets $M_P$ (generated → reference) and $M_R$ (reference → generated) produced by the Best-Matching Algorithm, $NAS_D$ penalises any match that drifts outside its Mapping Window. In a given orientation let $N_{eval}$ be the length of the timeline being evaluated and $N_{opp}$ the length of the opposite timeline. A local-chronology-tolerance height $h_{LCT} = \lceil N_{eval}/N_{opp} \rceil$ is first derived from the Mapping-Window height, reduced by 1 when $N_{eval} > N_{opp}$ and the fractional part of the ratio lies in $(0, 0.5]$. Each window is then expanded symmetrically by $\tau_{LCT} h_{LCT}$ rows ($\tau_{LCT} \geq 0$ is user-set). For a match at row $k$ with window $[s,e)$ the raw offset is $d(k) = s - k$ when $k < s$ or $k - (e-1)$ when $k \geq e$; the LCT-adjusted per-chunk penalty becomes $p(k) = \max\{0, d(k) - \tau_{LCT} h_{LCT}\}/N_{eval}$. Summing over all windows yields $P_{total}$; the worst-case penalty for the same window layout is $P_{max} = N_{eval}^{-1} \sum_j \max(s_j, N_{eval} - e_j)$. The orientation score is $NAS_{D,*} = 1 - P_{total}/P_{max}$, and the two orientations are fused by the harmonic mean
 
 \begin{equation}
 NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}}.
