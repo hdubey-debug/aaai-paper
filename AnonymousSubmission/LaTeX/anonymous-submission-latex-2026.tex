@@ -276,9 +276,9 @@ h_{LCT} = \lceil y/x \rceil - 1[y > x \land 0 < \text{frac}(y/x) \leq 0.5]
 
 where $y = N_{ref}$ and $x = N_{gen}$ for $NAS_{D,prec}$, and the reverse for $NAS_{D,rec}$. A user-defined multiplier $\tau_{LCT} \geq 0$ expands each Mapping Window by $\tau_{LCT} \cdot h_{LCT}$ rows. Chunks matching within this expanded window receive zero penalty.
 
-For chunks falling outside this tolerance zone, distance penalties are calculated based on their offset from the original Mapping Window boundary. Consider an evaluation chunk matched to its opposite counterpart, where the evaluation chunk has a corresponding Mapping Window. If the matched chunk appears above its expected window, the raw offset measures how many rows it sits above the window start. If the matched chunk appears below its expected window, the raw offset measures how many rows it sits below the window end. The LCT-adjusted penalty becomes zero if this raw offset falls within the tolerance threshold, otherwise the penalty equals the raw offset normalized by the evaluation timeline length.
+For chunks outside this tolerance zone, distance penalties are calculated from their offset from the Mapping Window boundary. Each evaluation chunk has a corresponding Mapping Window; if the matched chunk appears above the window, the raw offset measures rows above the window start; if below, it measures rows below the window end. The penalty becomes zero if this offset falls within the LCT tolerance, otherwise it equals the offset normalized by timeline length.
 
-Let $P_{total}$ be the sum of all penalties across matched pairs, and $P_{max}$ be the worst-case penalty when all chunks drift to their furthest possible positions. The orientation score is computed as:
+Let $P_{total}$ sum all penalties across matched pairs and $P_{max}$ represent the worst-case penalty when all chunks drift to furthest positions. The orientation score is computed as:
 
 \begin{equation}
 NAS_{D,*} = 1 - \frac{P_{total}}{P_{max}}
