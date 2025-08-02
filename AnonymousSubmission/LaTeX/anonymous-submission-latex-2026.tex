@@ -263,10 +263,13 @@ LAS = \frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R}
 \end{equation}
 
 \paragraph{Narrative Alignment Score (NAS)}
-However, LAS remains insensitive to chronological ordering, which inspires us to design NAS that evaluates temporal consistency using the matched pairs $M_P$ and $M_R$ from the Best-Matching Algorithm through distance-based penalties and line-based path analysis.
+However, LAS remains insensitive to chronological ordering, which inspires us to design NAS that evaluates temporal consistency. NAS comprises four components: Distance-based NAS ($NAS_D$), Line-based NAS ($NAS_L$), a window regularizer, and the user-controlled Local Chronology Tolerance (LCT) parameter.
+
+\paragraph{Defining Local Chronology Tolerance (LCT)}
+Before assessing narrative alignment, VCS defines a user-controlled parameter called Local Chronology Tolerance (LCT). This concept stems from the idea that a video can have multiple valid narratives where adjacent or concurrent events are described in different orders, and all orders are valid. To allow for this narrative variability, VCS defines LCT, where higher LCT values provide greater tolerance for re-ordering. In scenarios where $N_{ref}$ and $N_{gen}$ are divisible (either $N_{ref}$ is divisible by $N_{gen}$ or vice versa), LCT of 1 means we can swap immediate neighbors: in sequence $s_1s_2s_3s_4$, we can swap to $s_1s_3s_2s_4$ without penalty. LCT of 2 means we can swap 2nd neighbors: $s_1s_2s_3s_4$ becomes $s_3s_2s_1s_4$. In non-divisible scenarios, this exact swapping is not always possible, but LCT still adds tolerance for re-ordering—higher LCT allows farther chunks to be swapped.
 
 \paragraph{Distance-based NAS ($NAS_D$)}
-Mapping Windows define where chunks should ideally match if the narrative structure is preserved between reference and generated descriptions. $NAS_D$ formalizes this intuition by penalizing each chunk based on its distance from the ideal region defined by the Mapping Windows. For precision evaluation, $NAS_D$ uses correspondence set $M_P$ and precision Mapping Windows $MW_{prec}$; for recall evaluation, it uses correspondence set $M_R$ and recall Mapping Windows $MW_{rec}$.
+Mapping Windows define where chunks should ideally match if the narrative structure is preserved between reference and generated descriptions. $NAS_D$ formalizes this intuition by penalizing each chunk based on its distance from the ideal region defined by the Mapping Windows. For precision evaluation, $NAS_D$ uses correspondence set $M_P$ and precision Mapping Windows $MW_p$; for recall evaluation, it uses correspondence set $M_R$ and recall Mapping Windows $MW_r$.
 
 However, before computing penalties, VCS applies Local Chronology Tolerance (LCT) to account for natural narrative variations. LCT expands each Mapping Window with penalty-free zones, recognizing that chunks matching within these expanded regions represent acceptable chronological alignments. We first compute the LCT window height:
 
@@ -284,7 +287,7 @@ Let $P_{total}$ sum all penalties across matched pairs and $P_{max}$ represent t
 NAS_{D,*} = 1 - \frac{P_{total}}{P_{max}}
 \end{equation}
 
-For precision, $eval = gen$, $opp = ref$, $M_{eval} = M_P$, and $MW_{eval} = MW_{prec}$; for recall, $eval = ref$, $opp = gen$, $M_{eval} = M_R$, and $MW_{eval} = MW_{rec}$. The final score combines both orientations:
+For precision, $eval = gen$, $opp = ref$, $M_{eval} = M_P$, and $MW_{eval} = MW_p$; for recall, $eval = ref$, $opp = gen$, $M_{eval} = M_R$, and $MW_{eval} = MW_r$. The final score combines both orientations:
 
 \begin{equation}
 NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}}
