@@ -197,7 +197,7 @@ To address these limitations, we introduce VCS with three components:
 \begin{enumerate}
 \item \textbf{Global Alignment Score (GAS)}: Measures global thematic alignment.
 \item \textbf{Local Alignment Score (LAS)}: Assesses local semantic alignment.
-\item \textbf{Narrative Alignment Score (NAS)}: Evaluates chronological alignment using configurable Local Chronology Tolerance (LCT).
+\item \textbf{Narrative Alignment Score (NAS)}: Evaluates chronological alignment using configurable Local Narrative Tolerance (LNT).
 \end{enumerate}
 
 VCS combines these three components to provide comprehensive evaluation: GAS and LAS form the Semantic Alignment Score (SAS), which integrates with NAS to produce the final VCS score. We also present VCS$_{\text{short}}$, which applies the same framework to short-form descriptions.
@@ -207,7 +207,7 @@ To evaluate VCS, we need datasets of long-form video descriptions paired with qu
 Our primary contributions include:
 \begin{itemize}
 \item A robust metric (VCS) for both long-form and short-form video descriptions.
-\item Configurable LCT and chunk size parameters to govern chronological strictness and comparison granularity.
+\item Configurable LNT and chunk size parameters to govern chronological strictness and comparison granularity.
 \end{itemize}
 
 \section{Related Work}
@@ -263,25 +263,23 @@ LAS = \frac{2 \cdot LAS_P \cdot LAS_R}{LAS_P + LAS_R}
 \end{equation}
 
 \paragraph{Narrative Alignment Score (NAS)}
-However, LAS remains insensitive to chronological ordering, which inspires us to design NAS that evaluates temporal consistency. NAS comprises four components: Distance-based NAS ($NAS_D$), Line-based NAS ($NAS_L$), a window regularizer, and the user-controlled Local Chronology Tolerance (LCT) parameter.
+However, LAS remains insensitive to chronological ordering and exhibits limited sensitivity to missing or extra content. While LAS performs local semantic alignment and can detect content variations, its reliance on semantic similarity averaging means that even weak semantic matches contribute to the overall score, reducing its ability to strongly penalize missing or extraneous content. To mitigate both limitations, VCS introduces NAS that evaluates chronological consistency while enhancing sensitivity to content gaps and additions through narrative alignment assessment. NAS comprises four components: Distance-based NAS ($NAS_D$), Line-based NAS ($NAS_L$), a window regularizer, and the user-controlled Local Narrative Tolerance (LNT) parameter.
 
-\paragraph{Defining Local Chronology Tolerance (LCT)}
-Before assessing narrative alignment, VCS defines a user-controlled parameter called LCT. This concept stems from the observation that video narratives often permit multiple valid orderings where temporally adjacent or concurrent events can be described in different sequences without compromising narrative coherence. To accommodate this inherent flexibility, VCS employs LCT as a tolerance parameter that defines acceptable deviation from strict chronological order. 
-
-In scenarios where $N_{ref}$ and $N_{gen}$ are divisible and describe the same events in the same order, consider reference sequence $C_1^{ref}C_2^{ref}C_3^{ref}C_4^{ref}$ compared against generated sequence $C_2^{gen}C_1^{gen}C_3^{gen}C_4^{gen}$: at LCT of 0, this adjacent swap creates chronological misalignment, but LCT of 1 allows such adjacent chunk swaps to remain in alignment. Similarly, LCT of 2 permits sequence $C_3^{gen}C_2^{gen}C_1^{gen}C_4^{gen}$ to remain in alignment, allowing 2nd-neighbor swaps. In non-divisible scenarios, LCT provides proportional tolerance with higher values allowing greater chronological flexibility.
+\paragraph{Defining Local Narrative Tolerance (LNT)}
+Before assessing narrative alignment, VCS defines a user-controlled parameter called LNT. This concept stems from the observation that video narratives often permit multiple valid orderings and descriptive variations where temporally adjacent or concurrent events can be described in different sequences and detail levels without compromising narrative coherence. Complex video scenes frequently contain multiple actors and objects performing concurrent actions, where these details can be expressed in multiple valid orders and varying descriptive granularity—from highly detailed to moderate to sparse descriptions. To accommodate this inherent flexibility, VCS employs LNT as a tolerance parameter that defines acceptable deviation from strict chronological order and descriptive consistency, allowing higher LNT values to provide tolerance for both narrative reordering and descriptive variability when dense descriptions describe scenes with slightly different detail levels.
 
 \paragraph{Distance-based NAS ($NAS_D$)}
 Mapping Windows define where chunks should ideally match if the narrative structure is preserved between reference and generated descriptions. $NAS_D$ formalizes this intuition by penalizing each chunk based on its distance from the ideal region defined by the Mapping Windows. For precision evaluation, $NAS_D$ uses correspondence set $M_P$ and precision Mapping Windows $MW_p$; for recall evaluation, it uses correspondence set $M_R$ and recall Mapping Windows $MW_r$.
 
-However, before computing penalties, VCS applies Local Chronology Tolerance (LCT) to account for natural narrative variations. LCT expands each Mapping Window with penalty-free zones, recognizing that chunks matching within these expanded regions represent acceptable chronological alignments. We first compute the LCT window height:
+However, before computing penalties, VCS applies Local Narrative Tolerance (LNT) to account for natural narrative variations. LNT expands each Mapping Window with penalty-free zones, recognizing that chunks matching within these expanded regions represent acceptable chronological alignments. We first compute the LNT window height:
 
 \begin{equation}
-h_{LCT} = \lceil y/x \rceil - 1[y > x \land 0 < \text{frac}(y/x) \leq 0.5]
+h_{LNT} = \lceil y/x \rceil - 1[y > x \land 0 < \text{frac}(y/x) \leq 0.5]
 \end{equation}
 
-where $y = N_{ref}$ and $x = N_{gen}$ for $NAS_{D,prec}$, and the reverse for $NAS_{D,rec}$. A user-defined multiplier $\tau_{LCT} \geq 0$ expands each Mapping Window by $\tau_{LCT} \cdot h_{LCT}$ rows. Chunks matching within this expanded window receive zero penalty.
+where $y = N_{ref}$ and $x = N_{gen}$ for $NAS_{D,prec}$, and the reverse for $NAS_{D,rec}$. A user-defined multiplier $\tau_{LNT} \geq 0$ expands each Mapping Window by $\tau_{LNT} \cdot h_{LNT}$ rows. Chunks matching within this expanded window receive zero penalty.
 
-For chunks outside this tolerance zone, distance penalties are calculated from their offset from the Mapping Window boundary. Each evaluation chunk has a corresponding Mapping Window; if the matched chunk appears above the window, the raw offset measures rows above the window start; if below, it measures rows below the window end. The penalty becomes zero if this offset falls within the LCT tolerance, otherwise it equals the offset normalized by timeline length.
+For chunks outside this tolerance zone, distance penalties are calculated from their offset from the Mapping Window boundary. Each evaluation chunk has a corresponding Mapping Window; if the matched chunk appears above the window, the raw offset measures rows above the window start; if below, it measures rows below the window end. The penalty becomes zero if this offset falls within the LNT tolerance, otherwise it equals the offset normalized by timeline length.
 
 Let $P_{total}$ sum all penalties across matched pairs and $P_{max}$ represent the worst-case penalty when all chunks drift to furthest positions. The orientation score is computed as:
 
@@ -296,17 +294,17 @@ NAS_D = \frac{2 \cdot NAS_{D,prec} \cdot NAS_{D,rec}}{NAS_{D,prec} + NAS_{D,rec}
 \end{equation}
 
 \paragraph{Line-based NAS ($NAS_L$)}
-Treating each matched pair as a vertex $(x_i, y_i)$, VCS compares the path that connects them to an ideal narrative band bounded by the shortest and longest feasible paths constrained by the Mapping Windows. Dynamic programming gives the floor length $L_{min}$ and ceil length $L_{max}$; their vertical increments $\Delta y_{x_i}^{\text{floor}}$ are cached for later clipping. With source length $N_{src}$ and target length $N_{tgt}$ (equal to $N_{ref}$ or $N_{gen}$ depending on orientation) the base window height is $h_{mw} = \lceil N_{tgt}/N_{src} \rceil$. This height in turn defines an LCT kernel $\omega_0$ and its expanded version $\omega_{LCT} = \omega_0 + \kappa \tau_{LCT}$, where the scale $\kappa$ is $h_{mw}$ or $h_{mw} - 1$ exactly as in the implementation. For consecutive vertices the segment length is
+Treating each matched pair as a vertex $(x_i, y_i)$, VCS compares the path that connects them to an ideal narrative band bounded by the shortest and longest feasible paths constrained by the Mapping Windows. Dynamic programming gives the floor length $L_{min}$ and ceil length $L_{max}$; their vertical increments $\Delta y_{x_i}^{\text{floor}}$ are cached for later clipping. With source length $N_{src}$ and target length $N_{tgt}$ (equal to $N_{ref}$ or $N_{gen}$ depending on orientation) the base window height is $h_{mw} = \lceil N_{tgt}/N_{src} \rceil$. This height in turn defines an LNT kernel $\omega_0$ and its expanded version $\omega_{LNT} = \omega_0 + \kappa \tau_{LNT}$, where the scale $\kappa$ is $h_{mw}$ or $h_{mw} - 1$ exactly as in the implementation. For consecutive vertices the segment length is
 
 \begin{equation}
 \ell_i = \begin{cases}
 \sqrt{\Delta x_i^2 + \Delta y_i^2}, & 0 \leq |\Delta y_i|^* \leq \omega_0, \\
-\sqrt{\Delta x_i^2 + |\Delta y_{x_i}^{\text{floor}}|^2}, & \omega_0 < |\Delta y_i|^* \leq \omega_{LCT}, \\
+\sqrt{\Delta x_i^2 + |\Delta y_{x_i}^{\text{floor}}|^2}, & \omega_0 < |\Delta y_i|^* \leq \omega_{LNT}, \\
 0, & \text{otherwise},
 \end{cases}
 \end{equation}
 
-where $|\Delta y_i|^* = |\Delta y_i|$ if $\tau_{LCT} > 0$ and $|\Delta y_i|^* = \Delta y_i$ when $\tau_{LCT} = 0$. Summing $\ell_i$ gives the realised length $L_{act}$. The orientation score is
+where $|\Delta y_i|^* = |\Delta y_i|$ if $\tau_{LNT} > 0$ and $|\Delta y_i|^* = \Delta y_i$ when $\tau_{LNT} = 0$. Summing $\ell_i$ gives the realised length $L_{act}$. The orientation score is
 
 \begin{equation}
 NAS_{L,*} = \begin{cases}
@@ -377,7 +375,7 @@ We conduct comprehensive experiments to evaluate VCS performance on corruption d
 
 \subsection{Experimental Setup}
 
-We evaluate VCS alongside four rule-based metrics: BLEU \citep{p:02}, ROUGE-L \citep{l:04}, METEOR \citep{bl:05}, and CIDEr \citep{v:15}, and two embedding-based metrics: BERTScore \citep{z:20} and SBERT \citep{r:19}. For BERTScore, we use the RoBERTa-base backbone with F1-measure configuration. For SBERT, we employ the all-MiniLM-L6-v2 model for sentence embeddings. VCS uses NV-Embed-v2 for text embeddings with chunk size $k=3$ and Local Chronology Tolerance $\tau_{LCT}=0.1$ across all experiments.
+We evaluate VCS alongside four rule-based metrics: BLEU \citep{p:02}, ROUGE-L \citep{l:04}, METEOR \citep{bl:05}, and CIDEr \citep{v:15}, and two embedding-based metrics: BERTScore \citep{z:20} and SBERT \citep{r:19}. For BERTScore, we use the RoBERTa-base backbone with F1-measure configuration. For SBERT, we employ the all-MiniLM-L6-v2 model for sentence embeddings. VCS uses NV-Embed-v2 for text embeddings with chunk size $k=3$ and Local Narrative Tolerance $\tau_{LNT}=0.1$ across all experiments.
 
 The Corruption Detection Test Set provides ground-truth labels where valid variations receive score 1 and invalid corruptions receive score 0. For each metric, we compute scores between base descriptions and their corresponding variations/corruptions, then evaluate classification performance using accuracy, precision, recall, and F1-score with threshold 0.5.
 
@@ -443,11 +441,11 @@ Table~\ref{tab:corruption-results} presents the performance of VCS compared to t
 & {\footnotesize ±8.2} & {\footnotesize ±4.1} & {\footnotesize ±4.5} & {\footnotesize ±10} & {\footnotesize ±9.4} & {\footnotesize ±7.3} & {\footnotesize ±6.3} & {\footnotesize ±7.4} & {\footnotesize ±9.3} & {\footnotesize ±4.6} & {\footnotesize ±5.9} & {\footnotesize ±7.0} & {\footnotesize ±4.3} & {\footnotesize ±5.3} & {\footnotesize ±4.5} & {\footnotesize ±6.8} & {\footnotesize ±1.7} & {\footnotesize ±1.9} & {\footnotesize ±2.4} & {\footnotesize ±1.1} \\
 \hline
 
-\multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 93.7} & {\normalsize 95.1} & {\normalsize 95.8} & {\normalsize 86.0} & {\normalsize 80.0} & {\normalsize 92.2} & {\normalsize 87.5} & {\normalsize 88.5} & {\normalsize 81.0} & {\normalsize 86.4} & {\normalsize 69.1} & {\normalsize 53.4} & {\normalsize 62.2} & {\normalsize 1.90} & {\normalsize 5.00} & {\normalsize 62.4} & {\normalsize 0.70} & {\normalsize 3.40} & {\normalsize 0.10} & {\normalsize 42.9} \\
+\multirow{2}{*}{VCS$_{C_1|LNT_0}$} & {\normalsize 93.7} & {\normalsize 95.1} & {\normalsize 95.8} & {\normalsize 86.0} & {\normalsize 80.0} & {\normalsize 92.2} & {\normalsize 87.5} & {\normalsize 88.5} & {\normalsize 81.0} & {\normalsize 86.4} & {\normalsize 69.1} & {\normalsize 53.4} & {\normalsize 62.2} & {\normalsize 1.90} & {\normalsize 5.00} & {\normalsize 62.4} & {\normalsize 0.70} & {\normalsize 3.40} & {\normalsize 0.10} & {\normalsize 42.9} \\
 & {\footnotesize ±7.1} & {\footnotesize ±3.7} & {\footnotesize ±2.8} & {\footnotesize ±8.8} & {\footnotesize ±10} & {\footnotesize ±4.6} & {\footnotesize ±5.4} & {\footnotesize ±5.9} & {\footnotesize ±10} & {\footnotesize ±4.7} & {\footnotesize ±6.8} & {\footnotesize ±14} & {\footnotesize ±4.9} & {\footnotesize ±4.9} & {\footnotesize ±10} & {\footnotesize ±18} & {\footnotesize ±2.3} & {\footnotesize ±4.4} & {\footnotesize ±0.8} & {\footnotesize ±2.8} \\
 \cline{2-21}
 
-\multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 94.1} & {\normalsize 96.7} & {\normalsize 96.7} & {\normalsize 90.5} & {\normalsize 86.3} & {\normalsize 93.5} & {\normalsize 88.7} & {\normalsize 90.4} & {\normalsize 86.9} & {\normalsize 86.8} & {\normalsize 70.5} & {\normalsize 54.9} & {\normalsize 68.3} & {\normalsize 6.70} & {\normalsize 5.40} & {\normalsize 73.5} & {\normalsize 76.1} & {\normalsize 15.2} & {\normalsize 43.6} & {\normalsize 43.0} \\
+\multirow{2}{*}{VCS$_{C_1|LNT_1}$} & {\normalsize 94.1} & {\normalsize 96.7} & {\normalsize 96.7} & {\normalsize 90.5} & {\normalsize 86.3} & {\normalsize 93.5} & {\normalsize 88.7} & {\normalsize 90.4} & {\normalsize 86.9} & {\normalsize 86.8} & {\normalsize 70.5} & {\normalsize 54.9} & {\normalsize 68.3} & {\normalsize 6.70} & {\normalsize 5.40} & {\normalsize 73.5} & {\normalsize 76.1} & {\normalsize 15.2} & {\normalsize 43.6} & {\normalsize 43.0} \\
 & {\footnotesize ±7.1} & {\footnotesize ±2.6} & {\footnotesize ±1.8} & {\footnotesize ±5.8} & {\footnotesize ±6.5} & {\footnotesize ±3.9} & {\footnotesize ±5.0} & {\footnotesize ±5.2} & {\footnotesize ±6.9} & {\footnotesize ±4.5} & {\footnotesize ±7.0} & {\footnotesize ±14} & {\footnotesize ±4.6} & {\footnotesize ±10} & {\footnotesize ±10} & {\footnotesize ±12} & {\footnotesize ±6.5} & {\footnotesize ±7.6} & {\footnotesize ±2.4} & {\footnotesize ±2.8} \\
 \hline
 \end{tabular}
@@ -482,8 +480,8 @@ Table~\ref{tab:vatex-eval} presents human judgment correlation scores on the VAT
     PAC-S & 00.0 & 00.0 & 00.0 & 00.0 \\
     RefPAC-S & \textbf{31.4} & \textbf{40.5} & 38.1 & 48.8 \\
     \hline
-    VCS$_{C_1|LCT_0}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
-    VCS$_{C_1|LCT_1}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
+    VCS$_{C_1|LNT_0}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
+    VCS$_{C_1|LNT_1}$ & 00.0 & 00.0 & 00.0 & 00.0 \\
     \hline
   \end{tabular}
   \caption{Human judgment correlation scores on VATEX-EVAL dataset.}
@@ -525,10 +523,10 @@ Table~\ref{tab:author-consistency} presents performance comparison of different 
     \multirow{2}{*}{ROUGE-Lsum} & {\normalsize 52.6} & {\normalsize 55.1} & {\normalsize 59.2} & {\normalsize 52.6} & {\normalsize 51.3} & {\normalsize 56.4} & {\normalsize 55.3} & {\normalsize 51.4} & {\normalsize 56.2} & {\normalsize 59.3} & {\normalsize 56.5} & {\normalsize 56.0} \\
                         & {\footnotesize ±4.7} & {\footnotesize ±3.5} & {\footnotesize ±6.7} & {\footnotesize ±4.8} & {\footnotesize ±4.2} & {\footnotesize ±4.3} & {\footnotesize ±3.5} & {\footnotesize ±4.1} & {\footnotesize ±5.0} & {\footnotesize ±6.7} & {\footnotesize ±4.3} & {\footnotesize ±5.1} \\
     \hline
-    \multirow{2}{*}{VCS$_{C_1|LCT_0}$} & {\normalsize 76.3} & {\normalsize 77.9} & {\normalsize 74.9} & {\normalsize 76.3} & {\normalsize 75.2} & {\normalsize 76.7} & {\normalsize 77.9} & {\normalsize 75.2} & {\normalsize 76.5} & {\normalsize 74.9} & {\normalsize 76.7} & {\normalsize 76.5} \\
+    \multirow{2}{*}{VCS$_{C_1|LNT_0}$} & {\normalsize 76.3} & {\normalsize 77.9} & {\normalsize 74.9} & {\normalsize 76.3} & {\normalsize 75.2} & {\normalsize 76.7} & {\normalsize 77.9} & {\normalsize 75.2} & {\normalsize 76.5} & {\normalsize 74.9} & {\normalsize 76.7} & {\normalsize 76.5} \\
                          & {\footnotesize ±10} & {\footnotesize ±7.5} & {\footnotesize ±13} & {\footnotesize ±10} & {\footnotesize ±9.6} & {\footnotesize ±11} & {\footnotesize ±7.5} & {\footnotesize ±9.6} & {\footnotesize ±10} & {\footnotesize ±13} & {\footnotesize ±11} & {\footnotesize ±10} \\
     \hline
-    \multirow{2}{*}{VCS$_{C_1|LCT_1}$} & {\normalsize 82.5} & {\normalsize 80.5} & {\normalsize 81.6} & {\normalsize 82.5} & {\normalsize 79.1} & {\normalsize 83.8} & {\normalsize 80.5} & {\normalsize 79.1} & {\normalsize 81.6} & {\normalsize 81.6} & {\normalsize 83.8} & {\normalsize 81.6} \\
+    \multirow{2}{*}{VCS$_{C_1|LNT_1}$} & {\normalsize 82.5} & {\normalsize 80.5} & {\normalsize 81.6} & {\normalsize 82.5} & {\normalsize 79.1} & {\normalsize 83.8} & {\normalsize 80.5} & {\normalsize 79.1} & {\normalsize 81.6} & {\normalsize 81.6} & {\normalsize 83.8} & {\normalsize 81.6} \\
                          & {\footnotesize ±7.7} & {\footnotesize ±6.5} & {\footnotesize ±10} & {\footnotesize ±7.7} & {\footnotesize ±7.7} & {\footnotesize ±8.8} & {\footnotesize ±6.5} & {\footnotesize ±7.7} & {\footnotesize ±8.2} & {\footnotesize ±10} & {\footnotesize ±8.8} & {\footnotesize ±8.2} \\
     \hline
   \end{tabular}
